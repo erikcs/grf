@@ -54,6 +54,7 @@ matrix:
             - llvm-toolchain-precise-3.7
           packages:
             - clang-3.7
+            - clang-tidy-4.0
       env: COMPILER=clang++-3.7
       install: true
       before_install:
@@ -67,7 +68,7 @@ matrix:
       script:
         - cd core
         - mkdir build && cd build
-        - cmake -DCMAKE_CXX_COMPILER=$COMPILER .. && make
+        - cmake -DCMAKE_CXX_CLANG_TIDY:STRING="clang-tidy;-checks=-*,readability-*" -DCMAKE_CXX_COMPILER=$COMPILER .. && make
         - cd ..
         - valgrind --leak-check=full --error-exitcode=1 ./build/grf
 
