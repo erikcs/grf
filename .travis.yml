@@ -3,9 +3,9 @@ language: R
 latex: false
 cache: packages
 
-branches:
-  only:
-    - master
+# branches:
+  # only:
+    # - master
 
 r_binary_packages:
   - devtools
