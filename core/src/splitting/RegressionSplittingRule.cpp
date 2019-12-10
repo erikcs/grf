@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "RegressionSplittingRule.h"
+#include <random>
 
 namespace grf {
 
@@ -114,8 +115,12 @@ void RegressionSplittingRule::find_best_split_value_small_q(const Data& data,
   std::fill(sums_right, sums_right + num_splits, 0);
   std::fill(n_right, n_right + num_splits, 0);
 
+
+  std::mt19937_64 rng(num_splits);
+  std::vector<size_t> random_samples_order (samples[node]);
+  std::shuffle(random_samples_order.begin(), random_samples_order.end(), rng);
   // Sum in right child and possible split
-  for (auto& sample : samples[node]) {
+  for (auto& sample : random_samples_order) {
     double value = data.get(sample, var);
     double response = responses_by_sample[sample];
 
@@ -194,7 +199,7 @@ void RegressionSplittingRule::find_best_split_value_large_q(const Data& data,
     if (counter[i] == 0) {
       continue;
     }
-    
+
     n_left += counter[i];
     sum_left += sums[i];
 
