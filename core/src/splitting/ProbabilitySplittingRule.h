@@ -40,7 +40,7 @@ public:
                        const std::vector<std::vector<size_t>>& samples,
                        std::vector<size_t>& split_vars,
                        std::vector<double>& split_values,
-                       std::vector<bool>& nan_left);
+                       std::vector<bool>& send_missing_left);
 
 private:
   void find_best_split_value_small_q(const Data& data,
