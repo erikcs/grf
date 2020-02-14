@@ -74,23 +74,27 @@ public:
                        const std::vector<double>& responses_by_sample,
                        const std::vector<std::vector<size_t>>& samples,
                        std::vector<size_t>& split_vars,
-                       std::vector<double>& split_values);
+                       std::vector<double>& split_values,
+                       std::vector<bool>& send_missing_left);
 
 private:
   void find_best_split_value_small_q(const Data& data,
                                      size_t node,
                                      size_t var,
+                                     double weight_sum_node,
                                      double sum_node,
                                      size_t size_node,
                                      size_t min_child_size,
                                      double& best_value,
                                      size_t& best_var,
                                      double& best_decrease,
+                                     bool& best_send_missing_left,
                                      const std::vector<double>& responses_by_sample,
                                      const std::vector<std::vector<size_t>>& samples);
   void find_best_split_value_large_q(const Data& data,
                                      size_t node,
                                      size_t var,
+                                     double weight_sum_node,
                                      double sum_node,
                                      size_t size_node,
                                      size_t mind_child_size,
@@ -102,6 +106,7 @@ private:
 
   size_t* counter;
   double* sums;
+  double* weight_sums;
 
   double alpha;
   double imbalance_penalty;
