@@ -22,7 +22,7 @@
  bool MultiNoopRelabelingStrategy::relabel(
      const std::vector<size_t>& samples,
      const Data& data,
-     Eigen::ArrayXXd& responses_by_sample) const {
+     Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample) const {
 
    for (size_t sample : samples) {
      Eigen::VectorXd outcome = data.get_outcomes(sample);

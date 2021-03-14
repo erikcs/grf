@@ -23,7 +23,7 @@ namespace grf {
 bool MultiCausalRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,
     const Data& data,
-    Eigen::ArrayXXd& responses_by_sample) const {
+    Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample) const {
 
   // Prepare the relevant averages.
   size_t num_samples = samples.size();

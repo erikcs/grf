@@ -22,7 +22,7 @@ namespace grf {
 bool CustomRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,
     const Data& data,
-    Eigen::ArrayXXd& responses_by_sample) const {
+    Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample) const {
   return true;
 }
 

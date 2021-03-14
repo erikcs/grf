@@ -34,7 +34,7 @@ LLRegressionRelabelingStrategy::LLRegressionRelabelingStrategy(double split_lamb
 bool LLRegressionRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,
     const Data& data,
-    Eigen::ArrayXXd& responses_by_sample) const {
+    Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample) const {
 
   size_t num_variables = ll_split_variables.size();
   size_t num_data_points = samples.size();

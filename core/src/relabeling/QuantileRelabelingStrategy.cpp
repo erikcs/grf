@@ -26,7 +26,7 @@ QuantileRelabelingStrategy::QuantileRelabelingStrategy(const std::vector<double>
 bool QuantileRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,
     const Data& data,
-    Eigen::ArrayXXd& responses_by_sample) const {
+    Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample) const {
 
   std::vector<double> sorted_outcomes(samples.size());
   for (size_t i = 0; i < samples.size(); i++) {

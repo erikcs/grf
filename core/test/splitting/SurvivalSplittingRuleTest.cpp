@@ -37,7 +37,7 @@ std::vector<double> run_splits(const Data& data,
 
   size_t node = 0;
   size_t size_node = data.get_num_rows();
-  Eigen::ArrayXXd responses_by_sample(size_node, 1);
+  Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> responses_by_sample(size_node, 1);
   std::vector<std::vector<size_t>> samples(1);
   for (size_t sample = 0; sample < size_node; ++sample) {
     samples[node].push_back(sample);

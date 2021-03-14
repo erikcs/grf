@@ -68,7 +68,7 @@ private:
                   std::vector<size_t>& split_vars,
                   std::vector<double>& split_values,
                   std::vector<bool>& send_missing_left,
-                  Eigen::ArrayXXd& responses_by_sample,
+                  Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample,
                   const TreeOptions& tree_options) const;
 
   bool split_node_internal(size_t node,
@@ -79,7 +79,7 @@ private:
                            std::vector<size_t>& split_vars,
                            std::vector<double>& split_values,
                            std::vector<bool>& send_missing_left,
-                           Eigen::ArrayXXd& responses_by_sample,
+                           Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample,
                            uint min_node_size) const ;
 
   std::set<size_t> disallowed_split_variables;

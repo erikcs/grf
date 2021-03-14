@@ -33,7 +33,7 @@ public:
   bool find_best_split(const Data& data,
                        size_t node,
                        const std::vector<size_t>& possible_split_vars,
-                       const Eigen::ArrayXXd& responses_by_sample,
+                       const Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample,
                        const std::vector<std::vector<size_t>>& samples_by_node,
                        std::vector<size_t>& split_vars,
                        std::vector<double>& split_values,
@@ -45,7 +45,7 @@ public:
   */
  void find_best_split_internal(const Data& data,
                                const std::vector<size_t>& possible_split_vars,
-                               const Eigen::ArrayXXd& responses_by_sample,
+                               const Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample,
                                const std::vector<size_t>& samples,
                                double& best_value,
                                size_t& best_var,

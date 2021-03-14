@@ -38,7 +38,7 @@ TEST_CASE("simple quantile relabeling", "[quantile, relabeling]") {
 
   QuantileRelabelingStrategy relabeling_strategy({0.25, 0.5, 0.75});
 
-  Eigen::ArrayXXd relabeled_observations(data.get_num_rows(), 1);
+  Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> relabeled_observations(data.get_num_rows(), 1);
   bool stop = relabeling_strategy.relabel(samples, data, relabeled_observations);
   REQUIRE(stop == false);
 
@@ -61,7 +61,7 @@ TEST_CASE("quantile relabeling subset of observations", "[quantile, relabeling]"
 
   QuantileRelabelingStrategy relabeling_strategy({0.5, 0.75});
 
-  Eigen::ArrayXXd relabeled_observations(data.get_num_rows(), 1);
+  Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> relabeled_observations(data.get_num_rows(), 1);
   bool stop = relabeling_strategy.relabel(samples, data, relabeled_observations);
   REQUIRE(stop == false);
 

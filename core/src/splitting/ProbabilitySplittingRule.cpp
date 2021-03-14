@@ -47,7 +47,7 @@ ProbabilitySplittingRule::~ProbabilitySplittingRule() {
 bool ProbabilitySplittingRule::find_best_split(const Data& data,
                                                size_t node,
                                                const std::vector<size_t>& possible_split_vars,
-                                               const Eigen::ArrayXXd& responses_by_sample,
+                                               const Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample,
                                                const std::vector<std::vector<size_t>>& samples,
                                                std::vector<size_t>& split_vars,
                                                std::vector<double>& split_values,
@@ -99,7 +99,7 @@ void ProbabilitySplittingRule::find_best_split_value(const Data& data,
                                                      size_t& best_var,
                                                      double& best_decrease,
                                                      bool& best_send_missing_left,
-                                                     const Eigen::ArrayXXd& responses_by_sample,
+                                                     const Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& responses_by_sample,
                                                      const std::vector<std::vector<size_t>>& samples) {
   std::vector<double> possible_split_values;
   std::vector<size_t> sorted_samples;

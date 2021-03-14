@@ -44,7 +44,7 @@ std::vector<double> get_relabeled_outcomes(
 
   std::unique_ptr<RelabelingStrategy> relabeling_strategy(new InstrumentalRelabelingStrategy());
 
-  Eigen::ArrayXXd relabeled_observations(num_samples, 1);
+  Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> relabeled_observations(num_samples, 1);
   bool stop = relabeling_strategy->relabel(samples, data, relabeled_observations);
   if (stop) {
     return std::vector<double>();
