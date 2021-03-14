@@ -29,7 +29,8 @@ MultiRegressionSplittingRule::MultiRegressionSplittingRule(size_t max_num_unique
     imbalance_penalty(imbalance_penalty),
     num_outcomes(num_outcomes) {
   this->counter = new size_t[max_num_unique_values];
-  this->sums = Eigen::ArrayXXd(max_num_unique_values, num_outcomes);
+  this->sums = Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> (
+    max_num_unique_values, num_outcomes);
   this->weight_sums = new double[max_num_unique_values];
 }
 

@@ -58,7 +58,7 @@ private:
                              const std::vector<std::vector<size_t>>& samples);
 
   size_t* counter;
-  Eigen::ArrayXXd sums;
+  Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> sums;
   double* weight_sums;
 
   double alpha;
