@@ -4288,7 +4288,7 @@ public:
 // phmap::flat_hash_map
 // -----------------------------------------------------------------------------
 //
-// An `phmap::flat_hash_map<K, V>` is an unordered associative container which
+// An `spp::sparse_hash_map<K, V>` is an unordered associative container which
 // has been optimized for both speed and memory footprint in most common use
 // cases. Its interface is similar to that of `std::unordered_map<K, V>` with
 // the following notable differences:

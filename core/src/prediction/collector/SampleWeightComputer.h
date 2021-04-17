@@ -20,7 +20,7 @@
 
 #include "forest/Forest.h"
 
-#include <parallel_hashmap/phmap.h>
+#include <sparsepp/spp.h>
 #include <unordered_map>
 #include <vector>
 
@@ -28,16 +28,16 @@ namespace grf {
 
 class SampleWeightComputer {
 public:
-  phmap::flat_hash_map<size_t, double> compute_weights(size_t sample,
+  spp::sparse_hash_map<size_t, double> compute_weights(size_t sample,
                                                      const Forest& forest,
                                                      const std::vector<std::vector<size_t>>& leaf_nodes_by_tree,
                                                      const std::vector<std::vector<bool>>& valid_trees_by_sample) const;
 
 private:
   void add_sample_weights(const std::vector<size_t>& samples,
-                          phmap::flat_hash_map<size_t, double>& weights_by_sample) const;
+                          spp::sparse_hash_map<size_t, double>& weights_by_sample) const;
 
-  void normalize_sample_weights(phmap::flat_hash_map<size_t, double>& weights_by_sample) const;
+  void normalize_sample_weights(spp::sparse_hash_map<size_t, double>& weights_by_sample) const;
 };
 
 } // namespace grf
