@@ -28,7 +28,7 @@
 using namespace grf;
 
 TEST_CASE("simple quantile prediction", "[quantile, prediction]") {
-  spp::sparse_hash_map<size_t, double> weights_by_sample = {
+  phmap::flat_hash_map<size_t, double> weights_by_sample = {
       {0, 0.0}, {1, 0.1}, {2, 0.2}, {3, 0.1}, {4, 0.1},
       {5, 0.1}, {6, 0.2}, {7, 0.1}, {8, 0.0}, {9, 0.1}};
 
@@ -45,7 +45,7 @@ TEST_CASE("simple quantile prediction", "[quantile, prediction]") {
 }
 
 TEST_CASE("prediction with skewed quantiles", "[quantile, prediction]") {
-  spp::sparse_hash_map<size_t, double> weights_by_sample = {
+  phmap::flat_hash_map<size_t, double> weights_by_sample = {
       {0, 0.0}, {1, 0.1}, {2, 0.2}, {3, 0.1}, {4, 0.1},
       {5, 0.1}, {6, 0.2}, {7, 0.1}, {8, 0.0}, {9, 0.1}};
 
@@ -65,7 +65,7 @@ TEST_CASE("prediction with skewed quantiles", "[quantile, prediction]") {
 }
 
 TEST_CASE("prediction with repeated quantiles", "[quantile, prediction]") {
-  spp::sparse_hash_map<size_t, double> weights_by_sample = {
+  phmap::flat_hash_map<size_t, double> weights_by_sample = {
       {0, 0.0}, {1, 0.1}, {2, 0.2}, {3, 0.1}, {4, 0.1},
       {5, 0.1}, {6, 0.2}, {7, 0.1}, {8, 0.0}, {9, 0.1}};
 

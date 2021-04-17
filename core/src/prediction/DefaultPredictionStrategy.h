@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <sparsepp/spp.h>
+#include <parallel_hashmap/phmap.h>
 #include "commons/globals.h"
 #include "commons/Data.h"
 #include "prediction/Prediction.h"
@@ -58,7 +58,7 @@ public:
    *     be the same as the training matrix.
    */
   virtual std::vector<double> predict(size_t sample,
-    const spp::sparse_hash_map<size_t, double>& weights_by_sample,
+    const phmap::flat_hash_map<size_t, double>& weights_by_sample,
     const Data& train_data,
     const Data& data) const = 0;
 
@@ -80,7 +80,7 @@ public:
   virtual std::vector<double> compute_variance(
       size_t sample,
       const std::vector<std::vector<size_t>>& samples_by_tree,
-      const spp::sparse_hash_map<size_t, double>& weights_by_sampleID,
+      const phmap::flat_hash_map<size_t, double>& weights_by_sampleID,
       const Data& train_data,
       const Data& data,
       size_t ci_group_size) const = 0;

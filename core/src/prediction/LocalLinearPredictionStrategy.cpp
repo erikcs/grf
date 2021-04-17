@@ -39,7 +39,7 @@ size_t LocalLinearPredictionStrategy::prediction_length() const {
 
 std::vector<double> LocalLinearPredictionStrategy::predict(
     size_t sampleID,
-    const spp::sparse_hash_map<size_t, double>& weights_by_sampleID,
+    const phmap::flat_hash_map<size_t, double>& weights_by_sampleID,
     const Data& train_data,
     const Data& data) const {
   size_t num_variables = linear_correction_variables.size();
@@ -105,7 +105,7 @@ std::vector<double> LocalLinearPredictionStrategy::predict(
 std::vector<double> LocalLinearPredictionStrategy::compute_variance(
     size_t sampleID,
     const std::vector<std::vector<size_t>>& samples_by_tree,
-    const spp::sparse_hash_map<size_t, double>& weights_by_sampleID,
+    const phmap::flat_hash_map<size_t, double>& weights_by_sampleID,
     const Data& train_data,
     const Data& data,
     size_t ci_group_size) const {
