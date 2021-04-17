@@ -89,7 +89,7 @@ std::vector<Prediction> DefaultPredictionCollector::collect_predictions_batch(
   predictions.reserve(num_samples);
 
   for (size_t sample = start; sample < num_samples + start; ++sample) {
-    std::unordered_map<size_t, double> weights_by_sample = weight_computer.compute_weights(
+    phmap::flat_hash_map<size_t, double> weights_by_sample = weight_computer.compute_weights(
         sample, forest, leaf_nodes_by_tree, valid_trees_by_sample);
     std::vector<std::vector<size_t>> samples_by_tree;
 

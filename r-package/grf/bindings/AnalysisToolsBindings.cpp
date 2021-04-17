@@ -19,6 +19,7 @@
 #include <queue>
 #include <vector>
 
+#include <parallel_hashmap/phmap.h>
 #include "analysis/SplitFrequencyComputer.h"
 #include "commons/globals.h"
 #include "forest/Forest.h"
@@ -77,7 +78,7 @@ Eigen::SparseMatrix<double> compute_sample_weights(Rcpp::List forest_object,
   Eigen::SparseMatrix<double> result(num_samples, num_neighbors);
 
   for (size_t sample = 0; sample < num_samples; sample++) {
-    std::unordered_map<size_t, double> weights = weight_computer.compute_weights(
+    phmap::flat_hash_map<size_t, double> weights = weight_computer.compute_weights(
         sample, forest, leaf_nodes_by_tree, trees_by_sample);
     for (auto it = weights.begin(); it != weights.end(); it++) {
       size_t neighbor = it->first;

@@ -21,11 +21,11 @@
 
 namespace grf {
 
-std::unordered_map<size_t, double> SampleWeightComputer::compute_weights(size_t sample,
+phmap::flat_hash_map<size_t, double> SampleWeightComputer::compute_weights(size_t sample,
                                                                          const Forest& forest,
                                                                          const std::vector<std::vector<size_t>>& leaf_nodes_by_tree,
                                                                          const std::vector<std::vector<bool>>& valid_trees_by_sample) const {
-  std::unordered_map<size_t, double> weights_by_sample;
+  phmap::flat_hash_map<size_t, double> weights_by_sample;
 
   // Create a list of weighted neighbors for this sample.
   for (size_t tree_index = 0; tree_index < forest.get_trees().size(); ++tree_index) {
@@ -48,7 +48,7 @@ std::unordered_map<size_t, double> SampleWeightComputer::compute_weights(size_t 
 }
 
 void SampleWeightComputer::add_sample_weights(const std::vector<size_t>& samples,
-                                              std::unordered_map<size_t, double>& weights_by_sample) const {
+                                              phmap::flat_hash_map<size_t, double>& weights_by_sample) const {
   double sample_weight = 1.0 / samples.size();
 
   for (auto& sample : samples) {
@@ -56,7 +56,7 @@ void SampleWeightComputer::add_sample_weights(const std::vector<size_t>& samples
   }
 }
 
-void SampleWeightComputer::normalize_sample_weights(std::unordered_map<size_t, double>& weights_by_sample) const {
+void SampleWeightComputer::normalize_sample_weights(phmap::flat_hash_map<size_t, double>& weights_by_sample) const {
   double total_weight = 0.0;
   for (const auto& entry : weights_by_sample) {
     total_weight += entry.second;
