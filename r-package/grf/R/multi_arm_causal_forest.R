@@ -52,7 +52,6 @@
 #' @param num.trees Number of trees grown in the forest. Note: Getting accurate
 #'                  confidence intervals generally requires more trees than
 #'                  getting accurate predictions. Default is 2000.
-#' @param split.on.intercept ...
 #' @param sample.weights Weights given to each sample in estimation.
 #'                       If NULL, each observation receives the same weight.
 #'                       Note: To avoid introducing confounding, weights should be
@@ -168,7 +167,6 @@ multi_arm_causal_forest <- function(X, Y, W,
                                     Y.hat = NULL,
                                     W.hat = NULL,
                                     num.trees = 2000,
-                                    split.on.intercept = FALSE,
                                     sample.weights = NULL,
                                     clusters = NULL,
                                     equalize.cluster.weights = FALSE,
@@ -250,7 +248,6 @@ multi_arm_causal_forest <- function(X, Y, W,
                                 treatment = W.centered[, -1],
                                 sample.weights = sample.weights)
   args <- list(num.trees = num.trees,
-               intercept = split.on.intercept,
                clusters = clusters,
                samples.per.cluster = samples.per.cluster,
                sample.fraction = sample.fraction,
