@@ -1,8 +1,10 @@
 # The GRF Algorithm
 
+<img src='https://raw.githubusercontent.com/grf-labs/grf/master/images/logo/grf_logo_wbg_cropped.png' align="right" height="120" />
+
 The following guide gives an introduction to the generalized random forests algorithm as implemented in the `grf` package. It aims to give a complete description of the training and prediction procedures, as well as the options available for tuning. This guide is intended as an informal and practical reference; for a theoretical treatment of GRF, please consult the 'Generalized Random Forests' paper.
 
-GRF extends the idea of a classic random forest to allow for estimating other statistical quantities besides the expected outcome. Each forest type, for example`quantile_forest`, trains a random forest targeted at a particular problem, like quantile estimation. The most common use of GRF is in estimating treatment effects through the function `causal_forest`.
+GRF extends the idea of a classic random forest to allow for estimating other statistical quantities besides the expected outcome. Each forest type, for example `quantile_forest`, trains a random forest targeted at a particular problem, like quantile estimation. The most common use of GRF is in estimating treatment effects through the function `causal_forest`.
 
 ## Table of Contents
 * [General Algorithm](#general-algorithm)
@@ -124,13 +126,13 @@ The parameter `min.node.size` relates to the minimum size a leaf node is allowed
 There are several important caveats to this parameter:
 - When honesty is enabled, the leaf nodes are 'repopulated' after splitting with a fresh subsample. This means that the final tree may contain leaf nodes smaller than the `min.node.size` setting.
 - For regression forests, the splitting will only stop once a node has become smaller than `min.node.size`. Because of this, trees can have leaf nodes that violate the `min.node.size` setting. We initially chose this behavior to match that of other random forest packages like `randomForest` and `ranger`, but will likely be changed as it is misleading (see [#143](https://github.com/grf-labs/grf/issues/143)).
-- When training a causal forest, `min.node.size` takes on a slightly different notion related to the number of treatment and control samples. More detail can be found in the 'Split Penalization' section below, under the 'Causal Forests' heading.
+- When training a causal forest, `min.node.size` takes on a slightly different notion related to the number of treatment and control samples. More detail can be found in the 'Selecting Balanced Splits' section below, under the 'Causal Forests' heading.
 
 #### `alpha`
 
 The parameter `alpha` controls the maximum imbalance of a split. In particular, when splitting a parent node, the size of each child node is not allowed to be less than `size(parent) * alpha`. Its value must lie between (0, 0.25), and defaults to 0.05.
 
-When training a causal forest, this parameter takes on a slightly different notion related to the number of treatment and control samples. More detail can be found in the 'Split Penalization' section below, under the 'Causal Forests' heading.
+When training a causal forest, this parameter takes on a slightly different notion related to the number of treatment and control samples. More detail can be found in the 'Selecting Balanced Splits' section below, under the 'Causal Forests' heading.
 
 #### `imbalance.penalty`
 
@@ -182,7 +184,7 @@ In the sections above on `min.node.size`, `alpha`, and `imbalance.penalty`, we d
 
 For this reason, causal splitting uses modified notions of each split balancing parameter:
 - `min.node.size` usually determines the minimum number of examples a node should contain. In causal forests, the requirement is more stringent: a node must contain at least `min.node.size` treated samples, and also at least that many control samples.
-- In regression forests, `alpha` and `imbalance.penalty` help ensure that the size difference between children is not too large. When applying `alpha` and `imbalance.penalty`, we use a modified measure of node size that tries to capture how much 'information content' it contains. The new size measure is given by `\sum_{i in node} (W_i - \bar{W})^2`.
+- In regression forests, `alpha` and `imbalance.penalty` help ensure that the size difference between children is not too large. When applying `alpha` and `imbalance.penalty` in causal forests, we use a modified measure of node size that tries to capture how much 'information content' it contains. The new size measure is given by `\sum_{i in node} (W_i - \bar{W})^2`.
 
 The above description of `min.node.size` assumes that the treatment is binary, which in most cases is an oversimplification. The precise algorithm for enforcing `min.node.size` is as follows. Note that this same approach is used both when the treatment is binary or continuous.
 - Take the average of the parent node's treatment values.
@@ -192,12 +194,13 @@ The above description of `min.node.size` assumes that the treatment is binary, w
 
 In addition to personalized treatment effects, causal forests can be used to estimate the average treatment effect across the training population. Naively, one might estimate the average treatment effect by averaging personalized treatment effects across training examples. However, a more accurate estimate can be obtained by plugging causal forest predictions into a doubly robust average treatment effect estimator. As discussed in Chernozhukov et al. (2018), such approaches can yield semiparametrically efficient average treatment effect estimates and accurate standard error estimates under considerable generality. GRF provides the dedicated function `average_treatment_effect` to compute these estimates.
 
-The `average_treatment_effect` function implements two types of doubly robust average treatment effect estimations: augmented inverse-propensity weighting (Robins et al., 1994), and targeted maximum likelihood estimation (van der Laan and Rubin, 2006). Which method to use can be specified through the `method` parameter. The parameter `target.sample` controls which population the average treatment effect is taken over:
-- `target.sample = "all"`: the ATE on the whole population, `sum_{i = 1}^n E[Y(1) - Y(0) | X = X_i] / n`.
-- `target.sample = "treated"`: the ATE on the treated examples, `sum_{W_i = 1} E[Y(1) - Y(0) | X = X_i] / |{i : W_i = 1}|`.
-- `target.sample = "control"`: the ATE on the control examples, `sum_{W_i = 0} E[Y(1) - Y(0) | X = X_i] / |{i : W_i = 0}|`.
-- `target.sample = "overlap"`: the overlap-weighted ATE `sum_{i = 1}^n e(Xi) (1 - e(Xi)) E[Y(1) - Y(0) | X = Xi] / sum_{i = 1}^n e(Xi) (1 - e(Xi))`,
-  where `e(x) = P[W_i = 1 | X_i = x]`. This last estimand is recommended by Li et al. (2017) in case of poor overlap (i.e., when the treatment propensities e(x) may be very close to 0 or 1), as it doesn't involve dividing by estimated propensities.
+The `average_treatment_effect` function implements two types of doubly robust average treatment effect estimations: augmented inverse-propensity weighting (Robins et al., 1994), and targeted maximum likelihood estimation (van der Laan and Rubin, 2006). Which method to use can be specified through the `method` parameter. The following estimates are available:
+- The average treatment effect (`target.sample = all`): `E[Y(1) - Y(0)]`.
+- The average treatment effect on the treated (`target.sample = treated`): `E[Y(1) - Y(0) | Wi = 1]`.
+- The average treatment effect on the controls (`target.sample = control`): `E[Y(1) - Y(0) | Wi = 0]`.
+- The overlap-weighted average treatment effect (`target.sample = overlap`): `E[e(X) (1 - e(X)) (Y(1) - Y(0))] / E[e(X) (1 - e(X))`, where `e(x) = P[Wi = 1 | Xi = x]`.
+
+This last estimand is recommended by Li et al. (2018) in case of poor overlap (i.e., when the treatment propensities e(x) may be very close to 0 or 1), as it doesn't involve dividing by estimated propensities.
 
 ### Best Linear Projection of the CATE
 
@@ -222,7 +225,7 @@ The accuracy of a forest can be sensitive to several training parameters:
 - the parameters that control honesty behavior `honesty.fraction` and `honesty.prune.leaves`
 - the split balance parameters `alpha` and `imbalance.penalty`
 
-GRF provides a cross-validation procedure to select values of these parameters to use in training. To enable this tuning during training, the option `tune.parameters = "all"` can be passed to main forest method. The cross-validation methods can also be called directly through `tune_regression_forest` and `tune_causal_forest`. Parameter tuning is currently disabled by default.
+GRF provides a cross-validation procedure to select values of these parameters to use in training. To enable this tuning during training, the option `tune.parameters = "all"` can be passed to main forest method. Parameter tuning is currently disabled by default.
 
 The cross-validation procedure works as follows:
 - Draw a number of random points in the space of possible parameter values. By default, 100 distinct sets of parameter values are chosen (`tune.num.reps`).
@@ -255,8 +258,6 @@ The `boosted_regression_forest` method also contains parameters to control the s
 
 Alternatively, you can to skip the cross-validation procedure and specify the number of steps directly through the parameter `boost.steps`.
 
-By default, `causal_forest` uses `regression_forest` to perform orthogonalization (that is, estimating `e(x) = E[W|X=x]` and `m(x) = E[Y|X=x]`). If the `orthog.boosting` flag is enabled, then `boosted_regression_forest` will be used instead.
-
 Some additional notes about the behavior of boosted regression forests:
 - For computational reasons, if `tune.parameters` is enabled, then parameters are chosen by the `regression_forest` procedure once in the first boosting step. The selected parameters are then applied to train the forests in any further steps.
 - The `estimate.variance` parameter is not available for boosted forests.
@@ -274,15 +275,15 @@ Concretely, the cluster-robust training procedure proceeds as follows:
 - If honesty is enabled, split these cluster IDs in half, so that one half can be used for growing the tree, and the other half is used in repopulating the leaves.
 - To grow the tree, draw `samples_per_cluster` examples from each of the cluster IDs, and do the same when repopulating the leaves for honesty.
 
-Note that when clusters are provided, standard errors from `average_treatment_effect` and `average_partial_effect` estimation are also cluster-robust. Moreover, If clusters are specified, then each unit gets equal weight by default. For example, if there are 10 clusters with 1 unit each and per-cluster ATE = 1, and there are 10 clusters with 19 units each and per-cluster ATE = 0, then the overall ATE is 0.05 (additional sample.weights allow for custom weighting). If equalize.cluster.weights = TRUE each cluster gets equal weight and the overall ATE is 0.5.
+Note that when clusters are provided, standard errors from `average_treatment_effect` estimation are also cluster-robust. Moreover, If clusters are specified, then each unit gets equal weight by default. For example, if there are 10 clusters with 1 unit each and per-cluster ATE = 1, and there are 10 clusters with 19 units each and per-cluster ATE = 0, then the overall ATE is 0.05 (additional sample.weights allow for custom weighting). If equalize.cluster.weights = TRUE each cluster gets equal weight and the overall ATE is 0.5.
 
 ### Sample Weighting
 
 When the distribution of data that you observe is not representative of the population you are interested in scientifically, it can be important to adjust for this. We can pass `sample.weights` to specify that in our population of interest, we observe Xi with probability proportional to `sample.weights[i]`. By default, these weights are constant, meaning that our population of interest is the population from which X1 ... Xn are sampled. For causal validity, the weights we use should not be confounded with the potential outcomes --- typically this is done by having them be a function of Xi. One common example is inverse probability of complete case weighting to adjust for missing data, which allows us to work with only the complete cases (the units with nothing missing) to estimate properties of the full data distribution (all units as if nothing were missing).
 
-The impact these weights have depends on what we are estimating. When our estimand is a function of x, e.g. `r(x) = E[Y | X=x]` in `regression_forest` or `tau(x)=E[Y(1)-Y(0)| X=x]` in `causal_forest`, passing weights that are a function of x does not change our estimand. It instead prioritizes fit on our population of interest. In `regression_forest`, this means minimizing weighted mean squared error, i.e. mean squared error over the population specified by the sample weights. In `causal_forest`, this means minimizing weighted R-loss (Nie and Wager (2020), Equations 1/2). When our estimand is an average of such a function, as in `average_treatment_effect` and `average_partial_effect`, it does change the estimand. Our estimand will be the average treatment/partial effect over the population specified by our sample weights.
+The impact these weights have depends on what we are estimating. When our estimand is a function of x, e.g. `r(x) = E[Y | X=x]` in `regression_forest` or `tau(x)=E[Y(1)-Y(0)| X=x]` in `causal_forest`, passing weights that are a function of x does not change our estimand. It instead prioritizes fit on our population of interest. In `regression_forest`, this means minimizing weighted mean squared error, i.e. mean squared error over the population specified by the sample weights. In `causal_forest`, this means minimizing weighted R-loss (Nie and Wager (2020), Equations 1/2). When our estimand is an average of such a function, as in `average_treatment_effect`, it does change the estimand. Our estimand will be the average treatment/partial effect over the population specified by our sample weights.
 
-Currently most forest types takes `sample.weights` into account during splitting and prediction. The exception is `quantile_forest` where sample weighting is not a feature, `survival_forest` which only takes `sample.weights` into account during prediction (due to properties of the log-rank splitting criterion not being "amendable" to sample weights), and `causal_forest` with local linear (`ll_causal)` predictions, which does not take the weights into account during prediction.
+Currently most forest types takes `sample.weights` into account during splitting and prediction. The exception is local linear forests and `quantile_forest` where sample weighting is currently not a feature. `survival_forest` only takes `sample.weights` into account during prediction (due to properties of the log-rank splitting criterion not being "amendable" to sample weights).
 
 ### Categorical inputs
 
@@ -369,7 +370,7 @@ Li, Fan, Kari Lock Morgan, and Alan M. Zaslavsky. Balancing covariates via prope
 
 Mayer, Imke, Erik Sverdrup, Tobias Gauss, Jean-Denis Moyer, Stefan Wager and Julie Josse. Doubly robust treatment effect estimation with missing attributes. *arXiv preprint arXiv:1910.10624*, 2019.
 
-Nie, Xinkun, and Stefan Wager. Quasi-oracle estimation of heterogeneous treatment effects. *Biometrika*, 2020.
+Nie, Xinkun, and Stefan Wager. Quasi-oracle estimation of heterogeneous treatment effects. *Biometrika*, forthcoming.
 
 Robins, James M., Andrea Rotnitzky, and Lue Ping Zhao. Estimation of regression coefficients when some regressors are not always observed. *Journal of the American statistical Association*, 1994.
 

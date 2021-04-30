@@ -20,6 +20,9 @@
 
 namespace grf {
 
+MultiCausalRelabelingStrategy::MultiCausalRelabelingStrategy(size_t response_length) :
+  response_length(response_length) {}
+
 bool MultiCausalRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,
     const Data& data,
@@ -51,8 +54,8 @@ bool MultiCausalRelabelingStrategy::relabel(
     W_mean += weight * treatment;
     sum_weight += weight;
   }
-  Y_mean = Y_mean / sum_weight;
-  W_mean = W_mean / sum_weight;
+  Y_mean /= sum_weight;
+  W_mean /= sum_weight;
   Y_centered.rowwise() -= Y_mean.transpose();
   W_centered.rowwise() -= W_mean.transpose();
 
@@ -86,6 +89,10 @@ bool MultiCausalRelabelingStrategy::relabel(
     }
   }
   return false;
+}
+
+size_t MultiCausalRelabelingStrategy::get_response_length() const {
+  return response_length;
 }
 
 } // namespace grf

@@ -64,8 +64,25 @@ test_that("multi_regression_forest is similar to two regression_forest", {
   diff1 <- mean((predict(mrf)$predictions[, 1] - predict(rf1)$predictions)^2)
   diff2 <- mean((predict(mrf)$predictions[, 2] - predict(rf2)$predictions)^2)
 
-  expect_true(diff1 < 0.01)
-  expect_true(diff2 < 0.01)
+  expect_lt(diff1, 0.01)
+  expect_lt(diff2, 0.01)
+})
+
+test_that("multi_regression_forest is on parity with regression_forest", {
+  # Test that the R package implementation keeps a multi regression forest with one outcome
+  # identical to a regression forest.
+  n <- 500
+  p <- 5
+  X <- matrix(rnorm(n * p), n, p)
+  Y <-  X[, 1] * rnorm(n)
+  nmissing <- sample(c(1, 150, 400), size = 1)
+  X[cbind(sample(1:n, nmissing), sample(1:p, nmissing, replace = TRUE))] <- NaN
+
+  mrf <- multi_regression_forest(X, Y, num.trees = 500, seed = 42)
+  rf <- regression_forest(X, Y, num.trees = 500, ci.group.size = 1, seed = 42)
+
+  expect_equal(predict(mrf)$predictions[,], predict(rf)$predictions)
+  expect_equal(predict(mrf, X)$predictions[,], predict(rf, X)$predictions)
 })
 
 test_that("multi_regression_forest is well calibrated", {

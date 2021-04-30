@@ -166,7 +166,7 @@ mc.forest <- multi_arm_causal_forest(X, Y, W)
 # giving two contrasts tau_B = Y(B) - Y(A), tau_C = Y(C) - Y(A)
 mc.pred <- predict(mc.forest)
 # Fitting several outcomes jointly is supported, and the returned prediction array
-# has dimension num.samples * num.contrasts * num.outcomes. Since num.outcomes is
+# has dimension [num.samples, num.contrasts, num.outcomes]. Since num.outcomes is
 # one in this example, we can drop this singleton dimension using `[,,]`.
 tau.hat <- mc.pred$predictions[,,]
 
@@ -175,6 +175,11 @@ abline(0, 1, col = "red")
 points(X[, 2], tau.hat[, "C - A"], col = "blue")
 abline(0, -1.5, col = "red")
 legend("topleft", c("B - A", "C - A"), col = c("black", "blue"), pch = 19)
+
+# The average treatment effect of the arms with "A" as baseline.
+# (in the event the forest is fit with multiple Ys, specify the
+# response variable with the `outcome` argument)
+average_treatment_effect(mc.forest)
 
 # The conditional response surfaces mu_k(X) can be reconstructed from the
 # contrasts tau_k(x), the treatment propensities e_k(x), and the conditional mean m(x).
@@ -198,14 +203,12 @@ muC <- Y.hat - W.hat[, "B"] * tau.hat[, "B - A"] + (1 - W.hat[, "C"]) * tau.hat[
 Y.hat.baseline <- Y.hat - rowSums(W.hat[, -1] * tau.hat)
 mu.hat.matrix <- cbind(Y.hat.baseline, Y.hat.baseline + tau.hat)
 colnames(mu.hat.matrix) <- levels(W)
-
-# The average treatment effect of the arms with "A" as baseline.
-average_treatment_effect(mc.forest)
+head(mu.hat.matrix)
 
 # The reference level for contrast prediction can be changed with `relevel`.
-# Predict with treatment B as baseline:
+# Fit and predict with treatment B as baseline:
 W <- relevel(W, ref = "B")
-mc.forest <- multi_arm_causal_forest(X, Y, W)
+mc.forest.B <- multi_arm_causal_forest(X, Y, W)
 }
 
 }

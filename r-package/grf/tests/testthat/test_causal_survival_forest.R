@@ -3,7 +3,7 @@ library(grf)
 test_that("causal survival forest is well-calibrated", {
   n <- 1000
   p <- 5
-  data <- generate_survival_data(n, p, Y.max = 1, n.mc = 5000, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, Y.max = 1, n.mc = 5000, dgp = "simple1")
   cs.forest <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 500)
   cs.pred <- predict(cs.forest)
 
@@ -11,38 +11,64 @@ test_that("causal survival forest is well-calibrated", {
 
   X.test <- matrix(0.5, 10, p)
   X.test[, 1] <- seq(0, 1, length.out = 10)
-  true.effect.test <- generate_survival_data(10, p, Y.max = 1, X = X.test, n.mc = 5000, dgp = "simple1")$cate
+  true.effect.test <- generate_causal_survival_data(10, p, Y.max = 1, X = X.test, n.mc = 5000, dgp = "simple1")$cate
   cs.pred.test <- predict(cs.forest, X.test)
   mse.test <- mean((cs.pred.test$predictions - true.effect.test)^2)
 
-  expect_true(mse.oob < 0.01)
-  expect_true(mse.test < 0.01)
+  expect_lt(mse.oob, 0.01)
+  expect_lt(mse.test, 0.01)
+})
+
+test_that("causal survival forest predictions are kernel weighted correctly", {
+  # Test that the sufficient statistic approach to solving the forest weighted
+  # estimating equation is internally consistent.
+  n <- 250
+  p <- 5
+  data <- generate_causal_survival_data(n, p, Y.max = 1, n.mc = 1, dgp = "simple1")
+  sample.weights <- sample(c(1, 10), n, TRUE)
+  cs.forest <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 250)
+  cs.forest.weighted <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 250, sample.weights = sample.weights)
+  x1 <- data$X[1, , drop = FALSE]
+  cs.pred <- predict(cs.forest, x1)$predictions
+  cs.pred.weighted <- predict(cs.forest.weighted, x1)$predictions
+  forest.weights <- get_forest_weights(cs.forest, x1)[1, ]
+  forest.weights.weighted <- get_forest_weights(cs.forest.weighted, x1)[1, ]
+
+  theta1 <- sum(forest.weights * cs.forest$eta$numerator) /
+    sum(forest.weights * cs.forest$eta$denominator)
+  theta1.weighted <- sum(forest.weights.weighted * sample.weights * cs.forest.weighted$eta$numerator) /
+    sum(forest.weights.weighted * sample.weights * cs.forest.weighted$eta$denominator)
+
+  expect_equal(cs.pred, theta1)
+  expect_equal(cs.pred.weighted, theta1.weighted)
 })
 
 test_that("causal survival forest variance estimates are decent", {
   n <- 1000
   p <- 5
-  data <- generate_survival_data(n, p, Y.max = 1, n.mc = 5000, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, Y.max = 1, n.mc = 5000, dgp = "simple1")
   true.effect <- data$cate
   cs.forest <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 500)
   cs.pred <- predict(cs.forest, estimate.variance = TRUE)
-
-  ub.oob <- cs.pred$predictions + 2 * sqrt(cs.pred$variance.estimates)
-  lb.oob <- cs.pred$predictions - 2 * sqrt(cs.pred$variance.estimates)
-  cate.coverage.oob <- mean(lb.oob < true.effect & true.effect < ub.oob)
+  z.score.oob <- abs(cs.pred$predictions - true.effect) / sqrt(cs.pred$variance.estimates)
+  cate.coverage.oob <- mean(z.score.oob <= 1.96)
+  expect_gte(cate.coverage.oob, 0.7)
 
   X.test <- matrix(0.5, 10, p)
   X.test[, 1] <- seq(0, 1, length.out = 10)
-  true.effect.test <- rep(NA, 10)
-  true.effect.test <- generate_survival_data(10, p, Y.max = 1, X = X.test, n.mc = 5000, dgp = "simple1")$cate
+  true.effect.test <- generate_causal_survival_data(10, p, Y.max = 1, X = X.test, n.mc = 5000, dgp = "simple1")$cate
   cs.pred.test <- predict(cs.forest, X.test, estimate.variance = TRUE)
+  z.score.test <- abs(cs.pred.test$predictions - true.effect.test) / sqrt(cs.pred.test$variance.estimates)
+  cate.coverage.test <- mean(z.score.test <= 1.96)
+  expect_gte(cate.coverage.test, 0.6)
 
-  ub.test <- cs.pred.test$predictions + 2 * sqrt(cs.pred.test$variance.estimates)
-  lb.test <- cs.pred.test$predictions - 2 * sqrt(cs.pred.test$variance.estimates)
-  cate.coverage.test <- mean(lb.test < true.effect.test & true.effect.test < ub.test)
-
-  expect_true(cate.coverage.oob >= 0.65)
-  expect_true(cate.coverage.test >= 0.65)
+  # Duplicate some samples
+  sample.weights <- sample(c(1, 2), n, TRUE)
+  cs.forest.weighted <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 500, sample.weights = sample.weights)
+  cs.pred.weighted <- predict(cs.forest.weighted, estimate.variance = TRUE)
+  z.score.weighted <- abs(cs.pred.weighted$predictions - true.effect) / sqrt(cs.pred.weighted$variance.estimates)
+  cate.coverage.oob.weighted <- mean(z.score.weighted <= 1.96)
+  expect_gte(cate.coverage.oob.weighted, 0.7)
 })
 
 test_that("sample weighted causal survival forest is invariant to scaling", {
@@ -62,19 +88,19 @@ test_that("sample weighted causal survival forest is invariant to scaling", {
   p1 <- predict(sf)
   p2 <- predict(sf2)
 
-  expect_true(all(p1$predictions - p2$predictions == 0))
+  expect_equal(p1$predictions, p2$predictions)
 
   # Variance estimates are invariant to sample weight scaling
   v1 <- predict(sf, estimate.variance = TRUE)
   v2 <- predict(sf2, estimate.variance = TRUE)
 
-  expect_true(all(v1$variance.estimates - v2$variance.estimates == 0))
+  expect_equal(v1$variance.estimates, v2$variance.estimates)
 })
 
 test_that("a causal survival forest trained on dense data is near identical to forest trained on coarser grid", {
   n <- 1000
   p <- 5
-  data <- generate_survival_data(n, p, n.mc = 1, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, n.mc = 1, dgp = "simple1")
   cs.forest <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 500)
   cs.pred <- predict(cs.forest)
 
@@ -83,13 +109,13 @@ test_that("a causal survival forest trained on dense data is near identical to f
                                            failure.times = Y.grid)
   cs.pred.grid <- predict(cs.forest.grid)
 
-  expect_true(mean((cs.pred$predictions - cs.pred.grid$predictions)^2) < 0.001)
+  expect_lt(mean((cs.pred$predictions - cs.pred.grid$predictions)^2), 0.001)
 })
 
 test_that("nuisance argument handling in a causal survival forest works as expected", {
   n <- 1000
   p <- 5
-  data <- generate_survival_data(n, p, n.mc = 1, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, n.mc = 1, dgp = "simple1")
   cs.forest.default <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 200)
   cs.pred <- predict(cs.forest.default)
 
@@ -117,17 +143,17 @@ test_that("nuisance argument handling in a causal survival forest works as expec
                                        S.hat = S.hat$predictions,
                                        C.hat = C.hat$predictions)
 
-  expect_true(mean((predict(cs.forest1)$predictions - cs.pred$predictions)^2) < 0.005)
-  expect_true(mean((predict(cs.forest2)$predictions - cs.pred$predictions)^2) < 0.005)
-  expect_true(mean((predict(cs.forest3)$predictions - cs.pred$predictions)^2) < 0.005)
-  expect_true(mean((predict(cs.forest4)$predictions - cs.pred$predictions)^2) < 0.005)
-  expect_true(mean((predict(cs.forest5)$predictions - cs.pred$predictions)^2) < 0.005)
+  expect_lt(mean((predict(cs.forest1)$predictions - cs.pred$predictions)^2), 0.005)
+  expect_lt(mean((predict(cs.forest2)$predictions - cs.pred$predictions)^2), 0.005)
+  expect_lt(mean((predict(cs.forest3)$predictions - cs.pred$predictions)^2), 0.005)
+  expect_lt(mean((predict(cs.forest4)$predictions - cs.pred$predictions)^2), 0.005)
+  expect_lt(mean((predict(cs.forest5)$predictions - cs.pred$predictions)^2), 0.005)
 })
 
 test_that("causal survival forest works as expected with missing values", {
   n <- 1000
   p <- 5
-  data <- generate_survival_data(n, p, n.mc = 1, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, n.mc = 1, dgp = "simple1")
   nmissing <- 200
   data$X[cbind(sample(1:n, nmissing), sample(1:p, nmissing, replace = TRUE))] <- NaN
 
@@ -144,8 +170,8 @@ test_that("causal survival forest works as expected with missing values", {
   mse.oob.diff <- mean((predict(csf)$predictions - predict(csf.mia)$predictions)^2)
   mse.diff <- mean((predict(csf, data$X)$predictions - predict(csf.mia, X.mia)$predictions)^2)
 
-  expect_equal(mse.oob.diff, 0, tol = 0.001)
-  expect_equal(mse.diff, 0, tol = 0.001)
+  expect_equal(mse.oob.diff, 0, tolerance = 0.001)
+  expect_equal(mse.diff, 0, tolerance = 0.001)
 })
 
 # This characterization test locks in behavior for the default causal survival forest.
@@ -156,7 +182,7 @@ test_that("causal survival forest has not changed ", {
   n <- 500
   p <- 5
   dgp <- "simple1"
-  data <- generate_survival_data(n = n, p = p, dgp = dgp)
+  data <- generate_causal_survival_data(n = n, p = p, dgp = dgp)
   cs.forest <- causal_survival_forest(round(data$X, 2), round(data$Y, 2), data$W, data$D,
                                       num.trees = 50, seed = 42, num.threads = 4)
 
@@ -191,7 +217,7 @@ test_that("causal survival forest has not changed ", {
 test_that("causal survival forest summary functions works as expected", {
   n <- 500
   p <- 5
-  data <- generate_survival_data(n, p, Y.max = 1, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, Y.max = 1, dgp = "simple1")
   X <- data$X
   W <- data$W
   Y <- data$Y
@@ -205,10 +231,10 @@ test_that("causal survival forest summary functions works as expected", {
   ate.subset <- average_treatment_effect(cs.forest, subset = X[, 1] > 0.5)
 
   expect_equal(blp[1], ate[["estimate"]])
-  expect_equal(blp[2], ate[["std.err"]], tol = 1e-4)
-  expect_equal(ate[["estimate"]], mean(tau), tol = 3 * ate[["std.err"]])
+  expect_equal(blp[2], ate[["std.err"]], tolerance = 1e-4)
+  expect_equal(ate[["estimate"]], mean(tau), tolerance = 3 * ate[["std.err"]])
 
   expect_equal(blp.subset[1], ate.subset[["estimate"]])
-  expect_equal(blp.subset[2], ate.subset[["std.err"]], tol = 1e-4)
-  expect_equal(ate.subset[["estimate"]], mean(tau[X[, 1] > 0.5]), tol = 3 * ate.subset[["std.err"]])
+  expect_equal(blp.subset[2], ate.subset[["std.err"]], tolerance = 1e-4)
+  expect_equal(ate.subset[["estimate"]], mean(tau[X[, 1] > 0.5]), tolerance = 3 * ate.subset[["std.err"]])
 })

@@ -8,7 +8,7 @@
 #' @param num.trees Number of trees grown in the forest. Note: Getting accurate
 #'                  confidence intervals generally requires more trees than
 #'                  getting accurate predictions. Default is 2000.
-#' @param sample.weights Weights given to an observation in prediction.
+#' @param sample.weights Weights given to an observation in estimation.
 #'                       If NULL, each observation is given the same weight. Default is NULL.
 #' @param clusters Vector of integers or factors specifying which cluster each observation corresponds to.
 #'  Default is NULL (ignored).
@@ -104,7 +104,7 @@ probability_forest <- function(X, Y,
   if (length(Y) != nrow(X)) {
     stop("length of observations Y does not equal nrow(X).")
   }
-  if (any(is.na(Y))) {
+  if (anyNA(Y)) {
     stop("The vector of observations contains at least one NA.")
   }
   if (!is.factor(Y)) {

@@ -80,14 +80,14 @@ test_that("regression variance estimates are positive", {
   expect_true(all(preds.oob$variance.estimate > 0))
 
   error <- preds$predictions - truth
-  expect_true(mean(error^2) < 0.2)
+  expect_lt(mean(error^2), 0.2)
 
   truth.oob <- (X[, 1] > 0)
   error.oob <- preds.oob$predictions - truth.oob
-  expect_true(mean(error.oob^2) < 0.2)
+  expect_lt(mean(error.oob^2), 0.2)
 
   Z.oob <- error.oob / sqrt(preds.oob$variance.estimate)
-  expect_true(mean(abs(Z.oob) > 1) < 0.5)
+  expect_lt(mean(abs(Z.oob) > 1), 0.5)
 })
 
 test_that("using a sparse data representation produces the same predictions", {
@@ -126,7 +126,7 @@ test_that("regression forests with a positive imbalance.penalty have reasonable 
 
   forest <- regression_forest(X, Y, imbalance.penalty = 0.001)
   split.freq <- split_frequencies(forest)
-  expect_true(sum(split.freq[4, ]) > 0)
+  expect_gt(sum(split.freq[4, ]), 0)
 })
 
 test_that("regression forests with a very small imbalance.penalty behave similarly to unpenalized forests.", {
@@ -141,7 +141,7 @@ test_that("regression forests with a very small imbalance.penalty behave similar
 
   diff.large.penalty <- abs(forest.large.penalty$debiased.error - forest$debiased.error)
   diff.small.penalty <- abs(forest.small.penalty$debiased.error - forest$debiased.error)
-  expect_true(mean(diff.small.penalty) < 0.10 * mean(diff.large.penalty))
+  expect_lt(mean(diff.small.penalty), 0.10 * mean(diff.large.penalty))
 })
 
 test_that("variance estimates are positive [with sample weights]", {
@@ -203,7 +203,7 @@ test_that("inverse propensity weighting in the training of a regression forest w
   expect_true(ipw.mse.forest.weighted < ipw.mse.forest)
 })
 
-test_that("sample weighting is identical to replicating samples", {
+test_that("sample weighted regression forest is identical to replicating samples", {
   # To make these forests comparable sample.fraction has to be 1 to draw the same samples
   # and min.node.size 1 for the split stopping condition to be the same.
   n <- 500
@@ -231,9 +231,7 @@ test_that("sample weighting is identical to replicating samples", {
                                           honesty = FALSE,
                                           ci.group.size = 1,
                                           seed = 123)
-  diff.abs <- abs(predict(rf.weighted, XX)$predictions - predict(rf.duplicated.data, XX)$predictions)
-
-  expect_equal(all(diff.abs == 0), TRUE)
+  expect_equal(predict(rf.weighted, XX)$predictions, predict(rf.duplicated.data, XX)$predictions)
 })
 
 test_that("a non-pruned honest regression forest has lower MSE than a pruned honest regression forests
@@ -250,7 +248,7 @@ test_that("a non-pruned honest regression forest has lower MSE than a pruned hon
   mse.notpruned <- mean((predict(f2)$predictions - Y)^2)
 
   # Upper bound of 65 % is based on 10 000 repetitions of the above DGP
-  expect_true(mse.notpruned < 0.65 * mse.pruned)
+  expect_lt(mse.notpruned / mse.pruned, 0.65)
 })
 
 test_that("regression_forest works as expected with missing values", {
@@ -269,7 +267,7 @@ test_that("regression_forest works as expected with missing values", {
   Xr[is.nan(Xr)] <- 1e9
   X.mia <- cbind(Xl, Xr)
 
-  X.test <- matrix(rnorm(n * p), n * 2, p)
+  X.test <- matrix(rnorm(n * p), n, p)
   X.test[cbind(sample(1:n, nmissing), sample(1:p, nmissing, replace = TRUE))] <- NaN
   Xlt <- X.test
   Xrt <- X.test
@@ -280,21 +278,21 @@ test_that("regression_forest works as expected with missing values", {
   rf.mia <- regression_forest(X.mia, Y, seed = 123)
   rf <- regression_forest(X, Y, seed = 123)
 
-  mse.oob.diff <- mean((predict(rf.mia)$pred - predict(rf)$pred)^2)
-  mse.diff <- mean((predict(rf.mia, X.mia)$pred - predict(rf, X)$pred)^2)
-  mse.test.diff <- mean((predict(rf.mia, X.mia.test)$pred - predict(rf, X.test)$pred)^2)
+  mse.oob.diff <- mean((predict(rf.mia)$predictions - predict(rf)$predictions)^2)
+  mse.diff <- mean((predict(rf.mia, X.mia)$predictions - predict(rf, X)$predictions)^2)
+  mse.test.diff <- mean((predict(rf.mia, X.mia.test)$predictions - predict(rf, X.test)$predictions)^2)
 
-  diff.mse.oob <- mean((predict(rf.mia)$pred - Y)^2) - mean((predict(rf)$pred - Y)^2)
-  diff.mse <- mean((predict(rf.mia, X.mia)$pred - Y)^2) - mean((predict(rf, X)$pred - Y)^2)
-  diff.mse.test <- mean((predict(rf.mia, X.mia.test)$pred - Y)^2) - mean((predict(rf, X.test)$pred - Y)^2)
+  diff.mse.oob <- mean((predict(rf.mia)$predictions - Y)^2) - mean((predict(rf)$predictions - Y)^2)
+  diff.mse <- mean((predict(rf.mia, X.mia)$predictions - Y)^2) - mean((predict(rf, X)$predictions - Y)^2)
+  diff.mse.test <- mean((predict(rf.mia, X.mia.test)$predictions - Y)^2) - mean((predict(rf, X.test)$predictions - Y)^2)
 
-  expect_equal(mse.oob.diff, 0, tol = 0.001)
-  expect_equal(mse.diff, 0, tol = 0.001)
-  expect_equal(mse.test.diff, 0, tol = 0.001)
+  expect_equal(mse.oob.diff, 0, tolerance = 0.001)
+  expect_equal(mse.diff, 0, tolerance = 0.001)
+  expect_equal(mse.test.diff, 0, tolerance = 0.001)
 
-  expect_equal(diff.mse.oob, 0, tol = 0.01)
-  expect_equal(diff.mse, 0, tol = 0.01)
-  expect_equal(diff.mse.test, 0, tol = 0.01)
+  expect_equal(diff.mse.oob, 0, tolerance = 0.01)
+  expect_equal(diff.mse, 0, tolerance = 0.01)
+  expect_equal(diff.mse.test, 0, tolerance = 0.01)
 
   # All NaNs
   X[, ] <- NaN
@@ -307,6 +305,6 @@ test_that("regression_forest works as expected with missing values", {
 
   rf.mia <- regression_forest(X.mia, Y, seed = 123)
   rf <- regression_forest(X, Y, seed = 123)
-  mse.oob.diff.allnan <- mean((predict(rf.mia)$pred - predict(rf)$pred)^2)
-  expect_equal(mse.oob.diff.allnan, 0, tol = 0.0001)
+  mse.oob.diff.allnan <- mean((predict(rf.mia)$predictions - predict(rf)$predictions)^2)
+  expect_equal(mse.oob.diff.allnan, 0, tolerance = 0.0001)
 })

@@ -120,7 +120,7 @@
 #' # giving two contrasts tau_B = Y(B) - Y(A), tau_C = Y(C) - Y(A)
 #' mc.pred <- predict(mc.forest)
 #' # Fitting several outcomes jointly is supported, and the returned prediction array
-#' # has dimension num.samples * num.contrasts * num.outcomes. Since num.outcomes is
+#' # has dimension [num.samples, num.contrasts, num.outcomes]. Since num.outcomes is
 #' # one in this example, we can drop this singleton dimension using `[,,]`.
 #' tau.hat <- mc.pred$predictions[,,]
 #'
@@ -129,6 +129,11 @@
 #' points(X[, 2], tau.hat[, "C - A"], col = "blue")
 #' abline(0, -1.5, col = "red")
 #' legend("topleft", c("B - A", "C - A"), col = c("black", "blue"), pch = 19)
+#'
+#' # The average treatment effect of the arms with "A" as baseline.
+#' # (in the event the forest is fit with multiple Ys, specify the
+#' # response variable with the `outcome` argument)
+#' average_treatment_effect(mc.forest)
 #'
 #' # The conditional response surfaces mu_k(X) can be reconstructed from the
 #' # contrasts tau_k(x), the treatment propensities e_k(x), and the conditional mean m(x).
@@ -152,14 +157,12 @@
 #' Y.hat.baseline <- Y.hat - rowSums(W.hat[, -1] * tau.hat)
 #' mu.hat.matrix <- cbind(Y.hat.baseline, Y.hat.baseline + tau.hat)
 #' colnames(mu.hat.matrix) <- levels(W)
-#'
-#' # The average treatment effect of the arms with "A" as baseline.
-#' average_treatment_effect(mc.forest)
+#' head(mu.hat.matrix)
 #'
 #' # The reference level for contrast prediction can be changed with `relevel`.
-#' # Predict with treatment B as baseline:
+#' # Fit and predict with treatment B as baseline:
 #' W <- relevel(W, ref = "B")
-#' mc.forest <- multi_arm_causal_forest(X, Y, W)
+#' mc.forest.B <- multi_arm_causal_forest(X, Y, W)
 #' }
 #'
 #' @export
@@ -191,33 +194,31 @@ multi_arm_causal_forest <- function(X, Y, W,
   if (length(W) != nrow(X)) {
     stop("length of observation (W, Y, Z or D) does not equal nrow(X).")
   }
-  if (any(is.na(W))) {
+  if (anyNA(W)) {
     stop("The vector of observations (W, Y, Z or D) contains at least one NA.")
   }
   if (!is.factor(W)) {
     stop("The treatment assignment W must be a factor vector.")
   }
-  num.treatments <- length(levels(W))
-  if (num.treatments == 1) {
+  if (nlevels(W) == 1) {
     stop("Can not compute contrasts from a single treatment.")
   }
-  W.matrix <- stats::model.matrix(~ W - 1)
 
   args.orthog <- list(X = X,
-                     num.trees = max(50, num.trees / 4),
-                     sample.weights = sample.weights,
-                     clusters = clusters,
-                     equalize.cluster.weights = equalize.cluster.weights,
-                     sample.fraction = sample.fraction,
-                     mtry = mtry,
-                     min.node.size = 5,
-                     honesty = TRUE,
-                     honesty.fraction = 0.5,
-                     honesty.prune.leaves = honesty.prune.leaves,
-                     alpha = alpha,
-                     imbalance.penalty = imbalance.penalty,
-                     num.threads = num.threads,
-                     seed = seed)
+                      num.trees = max(50, num.trees / 4),
+                      sample.weights = sample.weights,
+                      clusters = clusters,
+                      equalize.cluster.weights = equalize.cluster.weights,
+                      sample.fraction = sample.fraction,
+                      mtry = mtry,
+                      min.node.size = 5,
+                      honesty = TRUE,
+                      honesty.fraction = 0.5,
+                      honesty.prune.leaves = honesty.prune.leaves,
+                      alpha = alpha,
+                      imbalance.penalty = imbalance.penalty,
+                      num.threads = num.threads,
+                      seed = seed)
 
   if (is.null(Y.hat)) {
     forest.Y <- do.call(multi_regression_forest, c(Y = list(Y), args.orthog))
@@ -234,12 +235,13 @@ multi_arm_causal_forest <- function(X, Y, W,
     args.orthog$ci.group.size <- 1
     forest.W <- do.call(probability_forest, c(Y = list(W), args.orthog))
     W.hat <- predict(forest.W)$predictions
-  } else if (length(W.hat) == num.treatments) {
-    W.hat <- matrix(W.hat, nrow = length(W), ncol = num.treatments, byrow = TRUE)
-  } else if ((NROW(W.hat) != nrow(X)) || NCOL(W.hat) != num.treatments) {
+  } else if (length(W.hat) == nlevels(W)) {
+    W.hat <- matrix(W.hat, nrow = length(W), ncol = nlevels(W), byrow = TRUE)
+  } else if ((NROW(W.hat) != nrow(X)) || NCOL(W.hat) != nlevels(W)) {
     stop("W.hat has incorrect dimensions: should be a matrix of propensities for each (observation, arm).")
   }
 
+  W.matrix <- stats::model.matrix(~ W - 1)
   Y.centered <- Y - Y.hat
   W.centered <- W.matrix - W.hat
   data <- create_train_matrices(X,
@@ -297,7 +299,7 @@ multi_arm_causal_forest <- function(X, Y, W,
 #'                          only supported for univariate outcomes Y.
 #' @param ... Additional arguments (currently ignored).
 #'
-#' @return A list with elements `predictions`: a 3d array of dimension (num.samples * K-1 * M) with
+#' @return A list with elements `predictions`: a 3d array of dimension [num.samples, K-1, M] with
 #' predictions for each contrast, for each outcome 1,..,M (singleton dimensions in this array can
 #' be dropped by passing the `drop` argument to `[`, or with the shorthand `$predictions[,,]`),
 #'  and optionally `variance.estimates`: a matrix with K-1 columns with variance estimates for each contrast.
@@ -317,7 +319,7 @@ multi_arm_causal_forest <- function(X, Y, W,
 #' # giving two contrasts tau_B = Y(B) - Y(A), tau_C = Y(C) - Y(A)
 #' mc.pred <- predict(mc.forest)
 #' # Fitting several outcomes jointly is supported, and the returned prediction array
-#' # has dimension num.samples * num.contrasts * num.outcomes. Since num.outcomes is
+#' # has dimension [num.samples, num.contrasts, num.outcomes]. Since num.outcomes is
 #' # one in this example, we can drop this singleton dimension using `[,,]`.
 #' tau.hat <- mc.pred$predictions[,,]
 #'
@@ -326,6 +328,11 @@ multi_arm_causal_forest <- function(X, Y, W,
 #' points(X[, 2], tau.hat[, "C - A"], col = "blue")
 #' abline(0, -1.5, col = "red")
 #' legend("topleft", c("B - A", "C - A"), col = c("black", "blue"), pch = 19)
+#'
+#' # The average treatment effect of the arms with "A" as baseline.
+#' # (in the event the forest is fit with multiple Ys, specify the
+#' # response variable with the `outcome` argument)
+#' average_treatment_effect(mc.forest)
 #'
 #' # The conditional response surfaces mu_k(X) can be reconstructed from the
 #' # contrasts tau_k(x), the treatment propensities e_k(x), and the conditional mean m(x).
@@ -349,14 +356,12 @@ multi_arm_causal_forest <- function(X, Y, W,
 #' Y.hat.baseline <- Y.hat - rowSums(W.hat[, -1] * tau.hat)
 #' mu.hat.matrix <- cbind(Y.hat.baseline, Y.hat.baseline + tau.hat)
 #' colnames(mu.hat.matrix) <- levels(W)
-#'
-#' # The average treatment effect of the arms with "A" as baseline.
-#' average_treatment_effect(mc.forest)
+#' head(mu.hat.matrix)
 #'
 #' # The reference level for contrast prediction can be changed with `relevel`.
-#' # Predict with treatment B as baseline:
+#' # Fit and predict with treatment B as baseline:
 #' W <- relevel(W, ref = "B")
-#' mc.forest <- multi_arm_causal_forest(X, Y, W)
+#' mc.forest.B <- multi_arm_causal_forest(X, Y, W)
 #' }
 #'
 #' @method predict multi_arm_causal_forest
@@ -376,6 +381,7 @@ predict.multi_arm_causal_forest <- function(object,
   } else {
     colnames(object[["Y.orig"]])
   }
+  # Note the term `num.treatments` is overloaded, in multi_arm_causal_forest's context it means `num.contrasts`
   num.treatments <- length(treatment.names) - 1
   num.outcomes <- length(outcome.names)
   dimnames <- list(NULL, contrast.names, outcome.names)

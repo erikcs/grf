@@ -22,7 +22,6 @@
 #include "prediction/RegressionPredictionStrategy.h"
 #include "prediction/MultiRegressionPredictionStrategy.h"
 #include "prediction/ProbabilityPredictionStrategy.h"
-#include "relabeling/CustomRelabelingStrategy.h"
 #include "relabeling/CausalSurvivalRelabelingStrategy.h"
 #include "relabeling/InstrumentalRelabelingStrategy.h"
 #include "relabeling/MultiCausalRelabelingStrategy.h"
@@ -55,10 +54,10 @@ ForestTrainer instrumental_trainer(double reduced_form_weight,
 
 ForestTrainer multi_causal_trainer(size_t num_treatments,
                                    size_t num_outcomes) {
-
-  std::unique_ptr<RelabelingStrategy> relabeling_strategy(new MultiCausalRelabelingStrategy());
+  size_t response_length = num_treatments * num_outcomes;
+  std::unique_ptr<RelabelingStrategy> relabeling_strategy(new MultiCausalRelabelingStrategy(response_length));
   std::unique_ptr<SplittingRuleFactory> splitting_rule_factory =
-   std::unique_ptr<SplittingRuleFactory>(new MultiRegressionSplittingRuleFactory(num_treatments * num_outcomes));
+   std::unique_ptr<SplittingRuleFactory>(new MultiRegressionSplittingRuleFactory(response_length));
   std::unique_ptr<OptimizedPredictionStrategy> prediction_strategy(new MultiCausalPredictionStrategy(num_treatments, num_outcomes));
 
   return ForestTrainer(std::move(relabeling_strategy),
@@ -97,7 +96,7 @@ ForestTrainer regression_trainer() {
 }
 
 ForestTrainer multi_regression_trainer(size_t num_outcomes) {
-  std::unique_ptr<RelabelingStrategy> relabeling_strategy(new MultiNoopRelabelingStrategy());
+  std::unique_ptr<RelabelingStrategy> relabeling_strategy(new MultiNoopRelabelingStrategy(num_outcomes));
   std::unique_ptr<SplittingRuleFactory> splitting_rule_factory(new MultiRegressionSplittingRuleFactory(num_outcomes));
   std::unique_ptr<OptimizedPredictionStrategy> prediction_strategy(new MultiRegressionPredictionStrategy(num_outcomes));
 
@@ -141,15 +140,6 @@ ForestTrainer causal_survival_trainer(bool stabilize_splits) {
   return ForestTrainer(std::move(relabeling_strategy),
                        std::move(splitting_rule_factory),
                        std::move(prediction_strategy));
-}
-
-ForestTrainer custom_trainer() {
-  std::unique_ptr<RelabelingStrategy> relabeling_strategy(new CustomRelabelingStrategy());
-  std::unique_ptr<SplittingRuleFactory> splitting_rule_factory(new RegressionSplittingRuleFactory());
-
-  return ForestTrainer(std::move(relabeling_strategy),
-                       std::move(splitting_rule_factory),
-                       nullptr);
 }
 
 } // namespace grf

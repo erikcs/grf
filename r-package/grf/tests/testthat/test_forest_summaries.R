@@ -160,14 +160,14 @@ test_that("best linear projection is reasonable", {
   beta1.true <- 0.25 # cov(pmax(Z, 0), Z)/2
 
   blp.all <- best_linear_projection(forest, X[,1:2])
-  expect_equal(blp.all[1,1], beta0.true, tol = 0.1)
-  expect_equal(blp.all[2,1], beta1.true, tol = 0.1)
-  expect_equal(blp.all[3,1], 0, tol = 0.1)
+  expect_equal(blp.all[1,1], beta0.true, tolerance = 0.1)
+  expect_equal(blp.all[2,1], beta1.true, tolerance = 0.1)
+  expect_equal(blp.all[3,1], 0, tolerance = 0.1)
 
   blp.subset <- best_linear_projection(forest, X[,1:2], subset = (S == 1))
-  expect_equal(blp.subset[1,1], beta0.true * 2, tol = 0.2)
-  expect_equal(blp.subset[2,1], beta1.true * 2, tol = 0.2)
-  expect_equal(blp.subset[3,1], 0, tol = 0.2)
+  expect_equal(blp.subset[1,1], beta0.true * 2, tolerance = 0.2)
+  expect_equal(blp.subset[2,1], beta1.true * 2, tolerance = 0.2)
+  expect_equal(blp.subset[3,1], 0, tolerance = 0.2)
 
   std.errs <- c((blp.all[1,1] - beta0.true) / blp.all[1,2],
                (blp.all[2,1] - beta1.true) / blp.all[2,2],
@@ -180,11 +180,11 @@ test_that("best linear projection is reasonable", {
   expect_gt(mean(abs(std.errs)), 0.25)
 
   blp.shifted <- best_linear_projection(forest.shifted.W, X[,1:2])
-  expect_equal(blp.all[, "Estimate"], blp.shifted[, "Estimate"], tol = 0.05)
-  expect_equal(blp.all[, "Std. Error"], blp.shifted[, "Std. Error"], tol = 0.05)
+  expect_equal(blp.all[, "Estimate"], blp.shifted[, "Estimate"], tolerance = 0.05)
+  expect_equal(blp.all[, "Std. Error"], blp.shifted[, "Std. Error"], tolerance = 0.05)
 
   blp.2W <- best_linear_projection(forest.2W, X[,1:2])
-  expect_equal(blp.all[, "Estimate"]/2, blp.2W[, "Estimate"], tol = 0.05)
+  expect_equal(blp.all[, "Estimate"]/2, blp.2W[, "Estimate"], tolerance = 0.05)
 })
 
 test_that("best linear projection works with edge case input types", {
@@ -206,18 +206,18 @@ test_that("best linear projection works with edge case input types", {
 test_that("best linear projection works as expected with causal survival forest", {
   n <- 500
   p <- 5
-  data <- generate_survival_data(n, p, n.mc = 1, dgp = "simple1")
-  data.test <- generate_survival_data(5000, p, n.mc = 10000, dgp = "simple1")
+  data <- generate_causal_survival_data(n, p, n.mc = 1, dgp = "simple1")
+  data.test <- generate_causal_survival_data(5000, p, n.mc = 10000, dgp = "simple1")
   cs.forest <- causal_survival_forest(data$X, data$Y, data$W, data$D, num.trees = 500)
 
   ate.true <- mean(data.test$cate)
   blp.ate <- best_linear_projection(cs.forest)
-  expect_equal(ate.true, blp.ate[1, "Estimate"], tol = 2.1 * sqrt(blp.ate[1, "Std. Error"]))
+  expect_equal(ate.true, blp.ate[1, "Estimate"], tolerance = 2.1 * sqrt(blp.ate[1, "Std. Error"]))
 
   A1 <- data.test$X[, 1]
   blp.X1.true <- lm(data.test$cate ~ A1)$coefficients
   blp.X1 <- best_linear_projection(cs.forest, data$X[, 1])
-  expect_equal(blp.X1.true, blp.X1[, "Estimate"], tol = 2.1 * sqrt(blp.X1[, "Std. Error"]))
+  expect_equal(blp.X1.true, blp.X1[, "Estimate"], tolerance = 2.1 * sqrt(blp.X1[, "Std. Error"]))
 
   weights <- rep(1, n)
   dup <- sample(1:n, 50)
@@ -230,5 +230,5 @@ test_that("best linear projection works as expected with causal survival forest"
 
   blp.weight <- best_linear_projection(cs.forest.weight)
   blp.dup <- best_linear_projection(cs.forest.dup)
-  expect_equal(blp.weight[1, "Estimate"], blp.dup[1, "Estimate"], tol = 0.01)
+  expect_equal(blp.weight[1, "Estimate"], blp.dup[1, "Estimate"], tolerance = 0.01)
 })
