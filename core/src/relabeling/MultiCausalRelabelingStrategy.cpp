@@ -20,8 +20,9 @@
 
 namespace grf {
 
-MultiCausalRelabelingStrategy::MultiCausalRelabelingStrategy(size_t response_length) :
-  response_length(response_length) {}
+MultiCausalRelabelingStrategy::MultiCausalRelabelingStrategy(size_t response_length, bool split_on_intercept) :
+  response_length(response_length),
+  split_on_intercept(split_on_intercept) {}
 
 bool MultiCausalRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,

@@ -31,10 +31,11 @@ Rcpp::List multi_causal_train(Rcpp::NumericMatrix train_matrix,
                               unsigned int samples_per_cluster,
                               bool compute_oob_predictions,
                               unsigned int num_threads,
-                              unsigned int seed) {
+                              unsigned int seed,
+                              bool split_on_intercept) {
   size_t num_treatments = treatment_index.size();
   size_t num_outcomes = outcome_index.size();
-  ForestTrainer trainer = multi_causal_trainer(num_treatments, num_outcomes, stabilize_splits);
+  ForestTrainer trainer = multi_causal_trainer(num_treatments, num_outcomes, stabilize_splits, split_on_intercept);
 
   std::unique_ptr<Data> data = RcppUtilities::convert_data(train_matrix, sparse_train_matrix);
   data->set_outcome_index(outcome_index);
