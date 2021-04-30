@@ -40,7 +40,7 @@ namespace grf {
 */
 class MultiCausalRelabelingStrategy final: public RelabelingStrategy {
 public:
-  MultiCausalRelabelingStrategy(size_t response_length);
+  MultiCausalRelabelingStrategy(size_t response_length, bool split_on_intercept);
 
   bool relabel(
       const std::vector<size_t>& samples,
@@ -51,6 +51,7 @@ public:
 
 private:
   size_t response_length;
+  bool split_on_intercept;
 };
 
 } // namespace grf
