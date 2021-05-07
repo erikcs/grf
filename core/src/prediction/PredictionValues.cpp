@@ -29,7 +29,11 @@ PredictionValues::PredictionValues(const std::vector<std::vector<double>>& value
   num_nodes(values.size()),
   num_types(num_types) {}
 
-
+PredictionValues::PredictionValues(std::vector<std::vector<double>>& values,
+                                   size_t num_types):
+  values(values),
+  num_nodes(values.size()),
+  num_types(num_types) {}
 
 double PredictionValues::get(std::size_t node, size_t type) const {
   return values.at(node).at(type);
