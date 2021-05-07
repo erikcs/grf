@@ -171,11 +171,18 @@ PredictionValues MultiCausalPredictionStrategy::precompute_prediction_values(
     if (num_samples == 0) {
       continue;
     }
+    std::vector<double>& value = values[i];
+    value.resize(num_types);
 
-    Eigen::VectorXd sum_Y = Eigen::VectorXd::Zero(num_outcomes);
-    Eigen::VectorXd sum_W = Eigen::VectorXd::Zero(num_treatments);
-    Eigen::MatrixXd sum_YW = Eigen::MatrixXd::Zero(num_treatments, num_outcomes);
-    Eigen::MatrixXd sum_WW = Eigen::MatrixXd::Zero(num_treatments, num_treatments);
+    Eigen::Map<Eigen::VectorXd> sum_Y(value.data() + Y_index, num_outcomes);
+    Eigen::Map<Eigen::VectorXd> sum_W(value.data() + W_index, num_treatments);
+    Eigen::Map<Eigen::MatrixXd> sum_YW(value.data() + YW_index, num_treatments, num_outcomes);
+    Eigen::Map<Eigen::MatrixXd> sum_WW(value.data() + WW_index, num_treatments, num_treatments);
+
+    // Eigen::VectorXd sum_Y = Eigen::VectorXd::Zero(num_outcomes);
+    // Eigen::VectorXd sum_W = Eigen::VectorXd::Zero(num_treatments);
+    // Eigen::MatrixXd sum_YW = Eigen::MatrixXd::Zero(num_treatments, num_outcomes);
+    // Eigen::MatrixXd sum_WW = Eigen::MatrixXd::Zero(num_treatments, num_treatments);
     double sum_weight = 0.0;
     for (auto& sample : leaf_samples[i]) {
       double weight = data.get_weight(sample);
@@ -191,24 +198,31 @@ PredictionValues MultiCausalPredictionStrategy::precompute_prediction_values(
     if (std::abs(sum_weight) <= 1e-16) {
       continue;
     }
-    std::vector<double>& value = values[i];
-    value.reserve(num_types);
+    // std::vector<double>& value = values[i];
+    // value.reserve(num_types);
     // store sufficient statistics in order
     // {sum_weight, sum_Y, sum_W, sum_YW, sum_WW}
 
-    value.push_back(sum_weight / num_samples);
-    for (size_t j = 0; j < num_outcomes; j++) {
-      value.push_back(sum_Y[j] / num_samples);
-    }
-    for (size_t j = 0; j < num_treatments; j++) {
-      value.push_back(sum_W[j] / num_samples);
-    }
-    for (size_t j = 0; j < num_treatments * num_outcomes; j++) {
-      value.push_back(sum_YW.data()[j] / num_samples);
-    }
-    for (size_t j = 0; j < num_treatments * num_treatments; j++) {
-      value.push_back(sum_WW.data()[j] / num_samples);
-    }
+    value[weight_index]=sum_weight / num_samples;
+    sum_Y /= num_samples;
+    sum_W /= num_samples;
+    sum_YW /= num_samples;
+    sum_WW /= num_samples;
+
+
+    // value.push_back(sum_weight / num_samples);
+    // for (size_t j = 0; j < num_outcomes; j++) {
+    //   value.push_back(sum_Y[j] / num_samples);
+    // }
+    // for (size_t j = 0; j < num_treatments; j++) {
+    //   value.push_back(sum_W[j] / num_samples);
+    // }
+    // for (size_t j = 0; j < num_treatments * num_outcomes; j++) {
+    //   value.push_back(sum_YW.data()[j] / num_samples);
+    // }
+    // for (size_t j = 0; j < num_treatments * num_treatments; j++) {
+    //   value.push_back(sum_WW.data()[j] / num_samples);
+    // }
 
   }
 
