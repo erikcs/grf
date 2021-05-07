@@ -212,7 +212,7 @@ PredictionValues MultiCausalPredictionStrategy::precompute_prediction_values(
 
   }
 
-  return PredictionValues(std::move(values), num_types);
+  return PredictionValues(values, num_types);
 }
 
 std::vector<std::pair<double, double>> MultiCausalPredictionStrategy::compute_error(

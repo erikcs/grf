@@ -135,7 +135,7 @@ PredictionValues CausalSurvivalPredictionStrategy::precompute_prediction_values(
     value[DENOMINATOR] = denominator_sum / leaf_size;
   }
 
-  return PredictionValues(std::move(values), NUM_TYPES);
+  return PredictionValues(values, NUM_TYPES);
 }
 
 std::vector<std::pair<double, double>> CausalSurvivalPredictionStrategy::compute_error(

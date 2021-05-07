@@ -199,7 +199,7 @@ PredictionValues InstrumentalPredictionStrategy::precompute_prediction_values(
     value[INSTRUMENT_INSTRUMENT] = sum_ZZ / sum_weight;
   }
 
-  return PredictionValues(std::move(values), NUM_TYPES);
+  return PredictionValues(values, NUM_TYPES);
 }
 
 std::vector<std::pair<double, double>> InstrumentalPredictionStrategy::compute_error(

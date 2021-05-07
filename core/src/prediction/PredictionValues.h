@@ -30,8 +30,6 @@ public:
   PredictionValues(const std::vector<std::vector<double>>& values,
                    size_t num_types);
 
-  PredictionValues(std::vector<std::vector<double>>& values,
-                   size_t num_types);
 
   double get(size_t node, size_t type) const;
   const std::vector<double>& get_values(size_t node) const;

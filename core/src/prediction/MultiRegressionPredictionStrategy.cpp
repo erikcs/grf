@@ -73,7 +73,7 @@ PredictionValues MultiRegressionPredictionStrategy::precompute_prediction_values
     values[i] = std::vector<double> (sum.data(), sum.data() + num_outcomes);
   }
 
-  return PredictionValues(std::move(values), num_outcomes);
+  return PredictionValues(values, num_outcomes);
 }
 
 std::vector<std::pair<double, double>> MultiRegressionPredictionStrategy::compute_error(
