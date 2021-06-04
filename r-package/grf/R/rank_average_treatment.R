@@ -136,7 +136,7 @@ rank_average_treatment_effect <- function(forest,
     alpha <- seq.int(1, n)
   }
 
-  # Compute estimates
+  # Compute estimates, a function to be passed on to boostrap routine.
   # data: the original vector of priority scores (`priorities`).
   # indices: a vector of indices that define the bootstrap sample.
   estimate <- function(data, indices) {
