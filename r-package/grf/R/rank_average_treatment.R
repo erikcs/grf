@@ -78,6 +78,7 @@ rank_average_treatment_effect <- function(forest,
                                           num.trees.for.weights = 500) {
   # TODO: continuous W?
   # TODO: allow a vector of scores instead of forest as well?
+  # TODO: could estimate both AUTOC and QINI at the same time at practically zero cost...?
   method <- match.arg(method)
   if (R > 0 && !requireNamespace('boot', quietly = TRUE)) {
     stop("Bootstrapped standard error estimates requires the `boot` library.")
