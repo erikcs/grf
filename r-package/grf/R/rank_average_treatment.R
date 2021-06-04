@@ -22,7 +22,7 @@
 #'  WARNING: for valid statistical performance, these scores should be obtained independently from the training
 #'  data.
 #' @param method The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
-#' identity or linear weighting. Default is `AUTOC`.
+#'  identity or linear weighting. Default is `AUTOC`.
 #' @param R Optional number of bootstrap replicates for SEs (default is 0, no SEs. Requires)
 #'  the optional `boot` library. todo
 #' @param subset Specifies subset of the training examples over which we
