@@ -128,13 +128,19 @@ rank_average_treatment_effect <- function(forest,
   # TODO: complete rest of this
   # TODO: is the bootsrapped TOC correct?
 
+  if (method == "AUTOC") {
+    alpha <- rep(1, n)
+  } else {
+    alpha <- seq.int(1, n)
+  }
+
   # Compute estimates
   # data: the original vector of priority scores (`priorities`).
   # indices: a vector of indices that define the bootstrap sample.
   estimate <- function(data, indices) {
     priority.order <- order(data[indices], decreasing = TRUE)
     TOC <- cumsum(DR.scores[priority.order]) / seq.int(1, n) - ATE
-    RATE <- mean(TOC)
+    RATE <- weighted.mean(TOC, alpha)
 
     c(RATE, TOC)
   }
