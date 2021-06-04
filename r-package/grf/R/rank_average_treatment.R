@@ -77,6 +77,7 @@ rank_average_treatment_effect <- function(forest,
                                           compliance.score = NULL,
                                           num.trees.for.weights = 500) {
   # TODO: continuous W?
+  # TODO: allow a vector of scores instead of forest as well?
   method <- match.arg(method)
   if (R > 0 && !requireNamespace('boot', quietly = TRUE)) {
     stop("Bootstrapped standard error estimates requires the `boot` library.")
