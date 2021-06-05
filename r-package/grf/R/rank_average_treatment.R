@@ -1,7 +1,7 @@
 #' Estimate a Rank-Weighted Average Treatment Effect (RATE).
 #'
 #' Consider a rule S(Xi) assigning scores for units in decreasing order of treatment prioritization.
-#' In the case of a forest with binary treatment, we provide estimates of the following, where:
+#' In the case of a forest with binary treatment, we provide estimates of the following, where
 #' 1/n < q <= 1 represents the fraction of treated units:
 #' \itemize{
 #'   \item The Rank-Weighted Average Treatment Effect (RATE):
