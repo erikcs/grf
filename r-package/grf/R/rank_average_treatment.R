@@ -153,7 +153,7 @@ rank_average_treatment_effect <- function(forest,
 
     # 3. w ties faster
     prio.boot <- data[indices]
-    group.length <- as.integer(table(prio.boot))
+    group.length <- tabulate(prio.boot, nlevels(prio.boot))
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(DR.scores, as.integer(prio.boot)) / group.length
     DR.scores.sorted <- rev(rep.int(grp.means, group.length))
