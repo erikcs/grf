@@ -107,7 +107,7 @@ rank_average_treatment_effect <- function(forest,
     }
   }
   if (length(priorities == NROW(forest$Y.orig))) {
-    priorities <- priorities[subset]
+    priorities <- as.factor(priorities[subset]) # store as factor, more efficient for large |S| with many ties.
   } else if (length(priorities) != length(subset)) {
     stop("`priorities` must be a vector of length n or the subset length.")
   }
@@ -140,8 +140,24 @@ rank_average_treatment_effect <- function(forest,
   # data: the original vector of priority scores (`priorities`).
   # indices: a vector of indices that define the bootstrap sample.
   estimate <- function(data, indices) {
-    priority.order <- order(data[indices], decreasing = TRUE)
-    TOC <- cumsum(DR.scores[priority.order]) / seq.int(1, n) - ATE
+    # 1. w/o ties:
+    # priority.order <- order(data[indices], decreasing = TRUE)
+    # TOC <- cumsum(DR.scores[priority.order]) / seq.int(1, n) - ATE
+    # RATE <- weighted.mean(TOC, alpha)
+
+    # 2. w ties
+    # s <- split(DR.scores, data[indices])
+    # DR.scores.sorted <- rev(rep.int(sapply(s, mean), lengths(s)))
+    # TOC <- cumsum(DR.scores.sorted) / seq.int(1, n) - ATE
+    # RATE <- weighted.mean(TOC, alpha)
+
+    # 3. w ties faster
+    prio.boot <- data[indices]
+    group.length <- as.integer(table(prio.boot))
+    group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
+    grp.means <- rowsum(DR.scores, as.integer(prio.boot)) / group.length
+    DR.scores.sorted <- rev(rep.int(grp.means, group.length))
+    TOC <- cumsum(DR.scores.sorted) / seq.int(1, n) - ATE
     RATE <- weighted.mean(TOC, alpha)
 
     c(RATE, TOC)
