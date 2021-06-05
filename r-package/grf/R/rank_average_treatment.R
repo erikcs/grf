@@ -5,10 +5,10 @@
 #' 1/n < q <= 1 represents the fraction of treated units:
 #' \itemize{
 #'   \item The Rank-Weighted Average Treatment Effect (RATE):
-#'    \int_{0}^{1} \alpha(q) TOC(q; S) dq, where \alpha is a weighting method
+#'    \eqn{\int_{0}^{1} alpha(q) TOC(q; S) dq}, where alpha is a weighting method
 #'    corresponding to either `AUTOC` (identity-weighting) or `QINI` (linear weighting).
 #'   \item The Targeting Operating Characteristic (TOC):
-#'     E[Y(1) - Y(0) | F(S(X)) >= 1 - q] - E[Y(1) - Y(0)], where F(.) is the distribution function of S(Xi).
+#'     \eqn{E[Y(1) - Y(0) | F(S(X)) >= 1 - q] - E[Y(1) - Y(0)]}, where F(.) is the distribution function of S(Xi).
 #' }
 #' The TOC is a curve comparing treatment effects to the overall average treatment effect while varying
 #' the fraction of treated units.
@@ -76,6 +76,7 @@ rank_average_treatment_effect <- function(forest,
                                           debiasing.weights = NULL,
                                           compliance.score = NULL,
                                           num.trees.for.weights = 500) {
+  # TODO: ALPHA in docstring is an unfortunate name collision with GRF forest weights...
   # TODO: continuous W?
   # TODO: allow a vector of scores instead of forest as well?
   # TODO: could estimate both AUTOC and QINI at the same time at practically zero cost...?
