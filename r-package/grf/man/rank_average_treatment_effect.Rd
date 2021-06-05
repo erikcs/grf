@@ -53,7 +53,7 @@ A list with elements `estimate`: the RATE estimate, `std.err`: boostrapped stand
  of RATE, `TOC`: the Targeting Operator Characteristic curve, along with bootstrapped standard errors.
 }
 \description{
-Consider a rule S(Xi) assigning scores for units in decreasing order of treatment prioritization.
+Consider a rule S(Xi) assigning scores to units in decreasing order of treatment prioritization.
 In the case of a forest with binary treatment, we provide estimates of the following, where
 1/n < q <= 1 represents the fraction of treated units:
 \itemize{
@@ -63,9 +63,10 @@ In the case of a forest with binary treatment, we provide estimates of the follo
   \item The Targeting Operating Characteristic (TOC):
     \eqn{E[Y(1) - Y(0) | F(S(Xi)) >= 1 - q] - E[Y(1) - Y(0)]}, where F(.) is the distribution function of S(Xi).
 }
-The TOC is a curve comparing treatment effects to the overall average treatment effect while varying
-the fraction of treated units.
-The RATE is a measure designed to identify prioritization rules that effectively targets treatment.
+The Targeting Operating Characteristic (TOC) is a curve comparing the benefit of treating only a certain
+fraction q of units (as prioritized by S(Xi)), to the overall average treatment effect.
+The Rank-Weighted Average Treatment Effect (RATE) is a weighted sum of this curve,
+and is a measure designed to identify prioritization rules that effectively targets treatment.
 }
 \details{
 TODO This paragraph can contain details. Etc etc. Breifly say ties are fine. Briefly
