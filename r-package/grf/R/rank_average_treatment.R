@@ -78,7 +78,6 @@ rank_average_treatment_effect <- function(forest,
                                           compliance.score = NULL,
                                           num.trees.for.weights = 500) {
   # TODO: ALPHA in docstring is an unfortunate name collision with GRF forest weights...
-  # TODO: continuous W?
   # TODO: allow a vector of scores instead of forest as well?
   # TODO: could estimate both AUTOC and QINI at the same time at practically zero cost...?
   method <- match.arg(method)
@@ -116,6 +115,9 @@ rank_average_treatment_effect <- function(forest,
 
   if (!any(c("causal_forest", "instrumental_forest", "causal_survival_forest") %in% class(forest))) {
     stop("`rank_average_treatment_effect` is not implemented for this forest type.")
+  }
+  if (!all(forest$W.orig %in% c(0, 1))) {
+    stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
   }
 
   # For all supported forest types, DR.scores is a n-length vector
