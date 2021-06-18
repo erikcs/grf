@@ -16,6 +16,32 @@
 # test_file('tests/testthat/test_rank_average_treatment_effect.R')
 # you can add a `browser()` statement anywhere int he code and reload to step through code
 
+test_that("behavior is locked in", {
+  set.seed(42)
+  p <- 6
+  n <- 250
+  X <- matrix(2 * runif(n * p) - 1, n, p)
+  W <- rbinom(n, 1, 0.5)
+  Y <- (X[, 1] > 0) * (2 * W - 1) + 2 * rnorm(n)
+  cf <- causal_forest(X, Y, W, num.trees = 200)
+
+  priorities1 <- sample(1:10, n, TRUE)
+  priorities2 <- rep(1, n)
+  priorities3 <- rnorm(n)
+
+  rate1 <- rank_average_treatment_effect(cf, priorities1, R = 100)
+  rate2 <- rank_average_treatment_effect(cf, priorities2, R = 100)
+  rate3 <- rank_average_treatment_effect(cf, priorities3, R = 100)
+
+  expect_equal(rate1$estimate, -0.05186264, tol=1e-6)
+  expect_equal(rate1$std.err, 0.4094249, tol=1e-6)
+
+  expect_equal(rate2$estimate, -1.779021e-15, tol=1e-6)
+  expect_equal(rate2$std.err, 0.3193724, tol=1e-6)
+
+  expect_equal(rate3$estimate, -1.065669, tol=1e-6)
+  expect_equal(rate3$std.err, 0.5038779, tol=1e-6)
+})
 
 test_that("rank_average_treatment_effect works as expected", {
   p <- 6
