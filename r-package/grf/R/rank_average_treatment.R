@@ -165,7 +165,7 @@ rank_average_treatment_effect <- function(forest,
   class(output) <- "rank_average_treatment_effect"
   output[["estimate"]] <- point.estimate[1]
   output[["std.err"]] <- std.errors[1]
-  output[["TOC"]] <- cbind(estimate = point.estimate[-1], std.err = std.errors[-1])
+  output[["TOC"]] <- data.frame(estimate = point.estimate[-1], std.err = std.errors[-1])
   output[["method"]] <- method
 
   output
