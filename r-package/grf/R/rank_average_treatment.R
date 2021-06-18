@@ -141,25 +141,14 @@ rank_average_treatment_effect <- function(forest,
   }
 
   # Compute estimates, a function to be passed on to boostrap routine.
-  # @data: the original (factor) vector of priority scores (`priorities`).
-  # @indices: a vector of indices that define the bootstrap sample.
+  # @data: a data.frame with the original data, DR.scores and priority scores.
+  # @indices: a vector of indices which define the bootstrap sample.
+  # @returns: an estimate of RATE, together with the TOC curve.
   estimate <- function(data, indices) {
-    # 1. w/o ties:
-    # priority.order <- order(data[indices], decreasing = TRUE)
-    # TOC <- cumsum(DR.scores[priority.order]) / seq.int(1, n) - ATE
-    # RATE <- weighted.mean(TOC, alpha)
-
-    # 2. w ties
-    # s <- split(DR.scores, data[indices])
-    # DR.scores.sorted <- rev(rep.int(sapply(s, mean), lengths(s)))
-    # TOC <- cumsum(DR.scores.sorted) / seq.int(1, n) - ATE
-    # RATE <- weighted.mean(TOC, alpha)
-
-    # 3. w ties faster
-    prio.boot <- data[indices]
-    group.length <- tabulate(prio.boot, nlevels(prio.boot))
+    prio <- data[indices, 2]
+    group.length <- tabulate(prio, nlevels(prio))
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
-    grp.means <- rowsum(DR.scores, as.integer(prio.boot)) / group.length
+    grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
     DR.scores.sorted <- rev(rep.int(grp.means, group.length))
     TOC <- cumsum(DR.scores.sorted) / seq.int(1, n) - ATE
     RATE <- weighted.mean(TOC, alpha)
@@ -168,7 +157,7 @@ rank_average_treatment_effect <- function(forest,
   }
   # TODO: write custom bootstrap function, `boot` doesnt do clustering.
   # should use parallell: https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
-  boot.output <- boot::boot(priorities, estimate, R)
+  boot.output <- boot::boot(data.frame(DR.scores, priorities), estimate, R)
   point.estimate <- boot.output[["t0"]]
   std.errors <- apply(boot.output[["t"]], 2, sd) # ensure invariance: should always be >= 0.
 
