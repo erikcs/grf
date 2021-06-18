@@ -184,8 +184,8 @@ plot.rank_average_treatment_effect <- function(x, ...) {
   n <- NROW(x[["TOC"]])
   q <- seq(1 / n, 1, by = 1 / n)
   TOC <- x[["TOC"]]
-  ub <- TOC[, "estimate"] + TOC[, "std.err"]
-  lb <- TOC[, "estimate"] - TOC[, "std.err"]
+  ub <- TOC[, "estimate"] + 1.96 * TOC[, "std.err"]
+  lb <- TOC[, "estimate"] - 1.96 * TOC[, "std.err"]
   plot(q, TOC[, "estimate"], type = "l", ylim = c(min(lb), max(ub)),
        ylab = "",
        main = "Targeting Operator Characteristic",
