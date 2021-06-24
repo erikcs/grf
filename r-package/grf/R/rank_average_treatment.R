@@ -107,7 +107,7 @@ rank_average_treatment_effect <- function(forest,
       stop("If specified, debiasing.weights must be a vector of length n or the subset length.")
     }
   }
-  if (length(priorities == NROW(forest$Y.orig))) {
+  if (length(priorities) == NROW(forest$Y.orig)) {
     priorities <- as.factor(priorities[subset]) # store as factor, more efficient for large |S| with many ties.
   } else if (length(priorities) != length(subset)) {
     stop("`priorities` must be a vector of length n or the subset length.")
