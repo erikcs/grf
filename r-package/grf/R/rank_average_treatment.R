@@ -157,7 +157,8 @@ rank_average_treatment_effect <- function(forest,
   }
   # TODO: write custom bootstrap function, `boot` doesnt do clustering.
   # should use parallell: https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
-  boot.output <- boot::boot(data.frame(DR.scores, priorities), estimate, R)
+  # boot.output <- boot::boot(data.frame(DR.scores, priorities), estimate, R)
+  boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, half.sample = F)
   point.estimate <- boot.output[["t0"]]
   std.errors <- apply(boot.output[["t"]], 2, sd) # ensure invariance: should always be >= 0.
 
@@ -206,4 +207,40 @@ plot.rank_average_treatment_effect <- function(x, ...) {
 #' @export
 print.rank_average_treatment_effect <- function(x, ...) {
   print(c(estimate = x[["estimate"]], std.err = x[["std.err"]]))
+}
+
+#' Simple clustered bootstrap
+#' Adopted from Bryan Ripley's `boot` boostrap package
+#' @param x The output of rank_average_treatment_effect.
+#' @param x The output of rank_average_treatment_effect.
+#' @param x The output of rank_average_treatment_effect.
+#' @param ... Additional arguments (currently ignored).
+#'
+#' @references Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions. R package version 1.3-28.
+#' @keywords internal
+boot <- function(data, statistic, R, clusters, half.sample = TRUE) {
+  n <- NROW(data)
+  if (n <= 1) {
+    stop("Cannot bootstrap sample of dim 1.")
+  }
+  if (half.sample) {
+    n.bs <- floor(n / 2)
+  } else {
+    n.bs <- n
+  }
+  index.array <- sample.int(n, n.bs * R, replace = TRUE)
+  # check: fortran order speed?
+  dim(index.array) <- c(R, n.bs)
+  # dim(index.array) <- c(n.bs, R)
+
+  t0 <- statistic(data, seq_len(n))
+
+  res <- lapply(seq_len(R), function(i) statistic(data, index.array[i, ]))
+  # res <- lapply(seq_len(R), function(i) statistic(data, index.array[, i]))
+  t <- matrix(, R, length(t0))
+  for (r in seq_len(R)) {
+    t[r, ] <- res[[r]]
+  }
+
+  list(t0 = t0, t = t)
 }
