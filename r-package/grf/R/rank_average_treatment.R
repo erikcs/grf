@@ -149,10 +149,11 @@ rank_average_treatment_effect <- function(forest,
     group.length <- tabulate(prio, nlevels(prio))
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
-    DR.scores.sorted <- rev(rep.int(grp.means, group.length))
+    DR.scores.sorted <- rev(grp.means)
     TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - ATE
-    RATE <- weighted.mean(TOC, alpha)
+    TOC <- rep.int(TOC, rev(group.length))
 
+    RATE <- weighted.mean(TOC, alpha)
     c(RATE, TOC)
   }
   # TODO: write custom bootstrap function, `boot` doesnt do clustering.
