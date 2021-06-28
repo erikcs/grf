@@ -81,9 +81,6 @@ rank_average_treatment_effect <- function(forest,
   # TODO: allow a vector of scores instead of forest as well?
   # TODO: could estimate both AUTOC and QINI at the same time at practically zero cost...?
   method <- match.arg(method)
-  if (R > 0 && !requireNamespace('boot', quietly = TRUE)) {
-    stop("Bootstrapped standard error estimates requires the `boot` library.")
-  }
   cluster.se <- length(forest$clusters) > 0
   clusters <- if (cluster.se) {
     forest$clusters
@@ -126,7 +123,6 @@ rank_average_treatment_effect <- function(forest,
                           compliance.score = compliance.score, num.trees.for.weights = num.trees.for.weights)
 
   ATE <- weighted.mean(DR.scores, subset.weights)
-  n <- length(priorities)
 
   # *** Compute the TOC and RATE ***
 
