@@ -1,4 +1,6 @@
 # DEVEL notes for Scotty
+# install With:
+# devtools::install_github("erikcs/grf", subdir = "r-package/grf", ref = "RATE"))
 # Push to this branch as you wish
 # Keep it up to date with master by rebasing and not merging, i.e.:
 # git rebase master
