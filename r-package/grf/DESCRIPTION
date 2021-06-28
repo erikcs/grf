@@ -30,7 +30,6 @@ Imports:
     sandwich (>= 2.4-0)
 RoxygenNote: 7.1.1
 Suggests:
-    boot,
     DiagrammeR,
     MASS,
     survival (>= 3.2-8),
