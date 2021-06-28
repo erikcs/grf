@@ -135,9 +135,9 @@ rank_average_treatment_effect <- function(forest,
   # TODO: is the bootsrapped TOC correct?
 
   if (method == "AUTOC") {
-    alpha <- rep(1, n)
-  } else {
-    alpha <- seq.int(1, n)
+    wtd.mean <- function(x) mean(x)
+  } else if (method == "QINI") {
+    wtd.mean <- function(x) weighted.mean(x, seq.int(1, length(x)))
   }
 
   # Compute estimates, a function to be passed on to boostrap routine.
@@ -153,7 +153,7 @@ rank_average_treatment_effect <- function(forest,
     TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - ATE
     TOC <- rep.int(TOC, rev(group.length))
 
-    RATE <- weighted.mean(TOC, alpha)
+    RATE <- wtd.mean(TOC)
     c(RATE, TOC)
   }
   # TODO: write custom bootstrap function, `boot` doesnt do clustering.
