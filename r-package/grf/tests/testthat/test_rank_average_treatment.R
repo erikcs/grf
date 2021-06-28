@@ -66,6 +66,9 @@ test_that("rank_average_treatment_effect works as expected", {
   # try to think of some other sample weight invariances... (can be tricky since you can't
   # test that duplicating some samples gives the exact same forest result as giving those samples weight=2)
 
+  # Last entry TOC always ZERO?
+  # TOC curve at ties = FLAT?
+
   expect_equal(1, 1)
 })
 
