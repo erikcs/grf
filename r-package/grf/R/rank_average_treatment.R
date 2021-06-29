@@ -222,18 +222,15 @@ boot <- function(data, statistic, R, clusters, half.sample = TRUE) {
   }
   if (half.sample) {
     n.bs <- floor(n / 2)
+    index.array <- replicate(R, sample.int(n, n.bs, replace = FALSE))
   } else {
-    n.bs <- n
+    index.array <- sample.int(n, n * R, replace = TRUE)
+    dim(index.array) <- c(n, R)
   }
-  index.array <- sample.int(n, n.bs * R, replace = TRUE)
-  # check: fortran order speed?
-  dim(index.array) <- c(R, n.bs)
-  # dim(index.array) <- c(n.bs, R)
 
   t0 <- statistic(data, seq_len(n))
 
-  res <- lapply(seq_len(R), function(i) statistic(data, index.array[i, ]))
-  # res <- lapply(seq_len(R), function(i) statistic(data, index.array[, i]))
+  res <- lapply(seq_len(R), function(i) statistic(data, index.array[, i]))
   t <- matrix(, R, length(t0))
   for (r in seq_len(R)) {
     t[r, ] <- res[[r]]
