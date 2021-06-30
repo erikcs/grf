@@ -122,7 +122,7 @@ rank_average_treatment_effect <- function(forest,
   DR.scores <- get_scores(forest, subset = subset, debiasing.weights = debiasing.weights,
                           compliance.score = compliance.score, num.trees.for.weights = num.trees.for.weights)
 
-  ATE <- weighted.mean(DR.scores, subset.weights)
+  # ATE <- weighted.mean(DR.scores, subset.weights) sample.weights TODO
 
   # *** Compute the TOC and RATE ***
 
@@ -146,7 +146,7 @@ rank_average_treatment_effect <- function(forest,
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
     DR.scores.sorted <- rev(grp.means)
-    TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - ATE
+    TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - mean(DR.scores.sorted)
     TOC <- rep.int(TOC, rev(group.length))
 
     RATE <- wtd.mean(TOC)
