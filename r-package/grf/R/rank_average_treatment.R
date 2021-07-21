@@ -24,6 +24,7 @@
 #'  data.
 #' @param method The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 #'  identity or linear weighting. Default is `AUTOC`.
+#' @param q The grid q TODO
 #' @param R Optional number of bootstrap replicates for SEs (default is 0, no SEs. Requires)
 #'  the optional `boot` library. todo
 #' @param subset Specifies subset of the training examples over which we
@@ -72,6 +73,7 @@
 rank_average_treatment_effect <- function(forest,
                                           priorities,
                                           method = c("AUTOC", "QINI"),
+                                          q = seq(0.1, 1, by = 0.1),
                                           R = 5,
                                           subset = NULL,
                                           debiasing.weights = NULL,
@@ -116,6 +118,12 @@ rank_average_treatment_effect <- function(forest,
   if (!all(forest$W.orig %in% c(0, 1))) {
     stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
   }
+  if (is.unsorted(q) || (anyDuplicated(q) != 0) || min(q) <= 0 || max(q) != 1) {
+    stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
+  }
+  if (min(temp <- floor(floor(length(subset) / 2) * q)) == 0 || anyDuplicated(temp) != 0) {
+    stop("Provided `q` grid is too dense to uniquely assign each unit to a bucket according to q.")
+  }
 
   # For all supported forest types, DR.scores is a n-length vector
   # (future support for multi_arm_causal_forest may be hairy...)
@@ -141,12 +149,16 @@ rank_average_treatment_effect <- function(forest,
   # @indices: a vector of indices which define the bootstrap sample.
   # @returns: an estimate of RATE, together with the TOC curve.
   estimate <- function(data, indices) {
+    nq <- floor(length(indices) * q)
+    grid.id <- rep.int(nq, c(nq[1], diff(nq)))
+
     prio <- data[indices, 2]
     group.length <- tabulate(prio, nlevels(prio))
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
     DR.scores.sorted <- rev(rep.int(grp.means, group.length))
-    TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - mean(DR.scores.sorted)
+    DR.scores.sorted.grid <- rowsum(DR.scores.sorted, grid.id)
+    TOC <- cumsum(DR.scores.sorted.grid) / nq - mean(DR.scores.sorted)
 
     RATE <- wtd.mean(TOC)
     c(RATE, TOC)
@@ -154,7 +166,7 @@ rank_average_treatment_effect <- function(forest,
   # TODO: write custom bootstrap function, `boot` doesnt do clustering.
   # should use parallell: https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
   # boot.output <- boot::boot(data.frame(DR.scores, priorities), estimate, R)
-  boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, half.sample = F)
+  boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, half.sample = TRUE)
   point.estimate <- boot.output[["t0"]]
   std.errors <- apply(boot.output[["t"]], 2, sd) # ensure invariance: should always be >= 0.
 
@@ -162,7 +174,7 @@ rank_average_treatment_effect <- function(forest,
   class(output) <- "rank_average_treatment_effect"
   output[["estimate"]] <- point.estimate[1]
   output[["std.err"]] <- std.errors[1]
-  output[["TOC"]] <- data.frame(estimate = point.estimate[-1], std.err = std.errors[-1])
+  output[["TOC"]] <- data.frame(estimate = point.estimate[-1], std.err = std.errors[-1], q = q)
   output[["method"]] <- method
 
   output
@@ -179,8 +191,8 @@ rank_average_treatment_effect <- function(forest,
 #' @export
 plot.rank_average_treatment_effect <- function(x, ...) {
   n <- NROW(x[["TOC"]])
-  q <- seq(1 / n, 1, by = 1 / n)
   TOC <- x[["TOC"]]
+  q <- TOC[, "q"]
   ub <- TOC[, "estimate"] + 1.96 * TOC[, "std.err"]
   lb <- TOC[, "estimate"] - 1.96 * TOC[, "std.err"]
   plot(q, TOC[, "estimate"], type = "l", ylim = c(min(lb), max(ub)),

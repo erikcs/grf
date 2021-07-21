@@ -8,6 +8,7 @@ rank_average_treatment_effect(
   forest,
   priorities,
   method = c("AUTOC", "QINI"),
+  q = seq(0.1, 1, by = 0.1),
   R = 5,
   subset = NULL,
   debiasing.weights = NULL,
@@ -24,6 +25,8 @@ data.}
 
 \item{method}{The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 identity or linear weighting. Default is `AUTOC`.}
+
+\item{q}{The grid q TODO}
 
 \item{R}{Optional number of bootstrap replicates for SEs (default is 0, no SEs. Requires)
 the optional `boot` library. todo}
