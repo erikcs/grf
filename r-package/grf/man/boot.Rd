@@ -9,13 +9,13 @@ boot(data, statistic, R, clusters, half.sample = TRUE, ...)
 \arguments{
 \item{data}{A data frame with the original data.}
 
-\item{statistic}{A function computing estimate(s).}
+\item{statistic}{A function computing estimate(s) from data.}
 
 \item{R}{The number of bootstrap replications.}
 
-\item{clusters}{Optional clusters.}
+\item{clusters}{Cluster assignment, setting to 1:N corresponds to an ordinary unclustered bootstrap.}
 
-\item{half.sample}{Whether to do half sample boostrap (Default).}
+\item{half.sample}{Whether to do half sample boostrap (half the clusters are drawn). Default is TRUE.}
 
 \item{...}{Additional arguments (currently ignored).}
 }
