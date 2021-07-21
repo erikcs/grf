@@ -2,21 +2,30 @@
 % Please edit documentation in R/rank_average_treatment.R
 \name{boot}
 \alias{boot}
-\title{Simple clustered bootstrap
-Adopted from Bryan Ripley's `boot` boostrap package}
+\title{Simple clustered bootstrap.}
 \usage{
-boot(data, statistic, R, clusters, half.sample = TRUE)
+boot(data, statistic, R, clusters, half.sample = TRUE, ...)
 }
 \arguments{
-\item{x}{The output of rank_average_treatment_effect.}
+\item{data}{A data frame with the original data.}
+
+\item{statistic}{A function computing estimate(s).}
+
+\item{R}{The number of bootstrap replications.}
+
+\item{clusters}{Optional clusters.}
+
+\item{half.sample}{Whether to do half sample boostrap (Default).}
 
 \item{...}{Additional arguments (currently ignored).}
 }
 \description{
-Simple clustered bootstrap
-Adopted from Bryan Ripley's `boot` boostrap package
+Adopted from the `boot` function in the boostrap package.
+A future TODO could be to add parallel
+https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
 }
 \references{
-Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions. R package version 1.3-28.
+Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
+ R package version 1.3-28.
 }
 \keyword{internal}

@@ -163,9 +163,6 @@ rank_average_treatment_effect <- function(forest,
     RATE <- wtd.mean(TOC)
     c(RATE, TOC)
   }
-  # TODO: write custom bootstrap function, `boot` doesnt do clustering.
-  # should use parallell: https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
-  # boot.output <- boot::boot(data.frame(DR.scores, priorities), estimate, R)
   boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, half.sample = TRUE)
   point.estimate <- boot.output[["t0"]]
   std.errors <- apply(boot.output[["t"]], 2, sd) # ensure invariance: should always be >= 0.
@@ -217,16 +214,22 @@ print.rank_average_treatment_effect <- function(x, ...) {
   print(c(estimate = x[["estimate"]], std.err = x[["std.err"]]))
 }
 
-#' Simple clustered bootstrap
-#' Adopted from Bryan Ripley's `boot` boostrap package
-#' @param x The output of rank_average_treatment_effect.
-#' @param x The output of rank_average_treatment_effect.
-#' @param x The output of rank_average_treatment_effect.
+#' Simple clustered bootstrap.
+#'
+#' Adopted from the `boot` function in the boostrap package.
+#' A future TODO could be to add parallel
+#' https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
+#' @param data A data frame with the original data.
+#' @param statistic A function computing estimate(s).
+#' @param R The number of bootstrap replications.
+#' @param clusters Optional clusters.
+#' @param half.sample Whether to do half sample boostrap (Default).
 #' @param ... Additional arguments (currently ignored).
 #'
-#' @references Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions. R package version 1.3-28.
+#' @references Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
+#'  R package version 1.3-28.
 #' @keywords internal
-boot <- function(data, statistic, R, clusters, half.sample = TRUE) {
+boot <- function(data, statistic, R, clusters, half.sample = TRUE, ...) {
   n <- NROW(data)
   if (n <= 1) {
     stop("Cannot bootstrap sample of dim 1.")
