@@ -145,9 +145,8 @@ rank_average_treatment_effect <- function(forest,
     group.length <- tabulate(prio, nlevels(prio))
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
-    DR.scores.sorted <- rev(grp.means)
+    DR.scores.sorted <- rev(rep.int(grp.means, group.length))
     TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - mean(DR.scores.sorted)
-    TOC <- rep.int(TOC, rev(group.length))
 
     RATE <- wtd.mean(TOC)
     c(RATE, TOC)
