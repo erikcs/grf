@@ -122,7 +122,7 @@ rank_average_treatment_effect <- function(forest,
     stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
   }
   if (min(temp <- floor(floor(length(subset) / 2) * q)) == 0 || anyDuplicated(temp) != 0) {
-    stop("Provided `q` grid is too dense to uniquely assign each unit to a bucket according to q.")
+    stop("Provided `q` grid is too dense to uniquely assign each unit to a bucket.")
   }
 
   # For all supported forest types, DR.scores is a n-length vector
