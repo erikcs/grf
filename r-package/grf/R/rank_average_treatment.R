@@ -163,7 +163,7 @@ rank_average_treatment_effect <- function(forest,
     RATE <- wtd.mean(TOC)
     c(RATE, TOC)
   }
-  boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, half.sample = TRUE)
+  boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, clusters, half.sample = TRUE)
   point.estimate <- boot.output[["t0"]]
   std.errors <- apply(boot.output[["t"]], 2, sd) # ensure invariance: should always be >= 0.
 
