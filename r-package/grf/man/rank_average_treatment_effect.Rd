@@ -9,7 +9,7 @@ rank_average_treatment_effect(
   priorities,
   method = c("AUTOC", "QINI"),
   q = seq(0.1, 1, by = 0.1),
-  R = 200,
+  R = 150,
   subset = NULL,
   debiasing.weights = NULL,
   compliance.score = NULL,
@@ -29,7 +29,7 @@ identity or linear weighting. Default is `AUTOC`.}
 \item{q}{The grid q to compute the TOC curve on. Defaults is
 (10\%, 20\%, ...,90\%,  100\%).}
 
-\item{R}{Optional number of bootstrap replicates for SEs. Default is 200.}
+\item{R}{Number of bootstrap replicates for SEs. Default is 150.}
 
 \item{subset}{Specifies subset of the training examples over which we
 estimate the ATE. WARNING: For valid statistical performance,
