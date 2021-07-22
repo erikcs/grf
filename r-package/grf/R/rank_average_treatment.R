@@ -138,7 +138,7 @@ rank_average_treatment_effect <- function(forest,
 
   # *** Compute the TOC and RATE ***
 
-  # TODO: bake in sample weight ATE <- weighted.mean(DR.scores, subset.weights) sample.weights TODO
+  # TODO: bake in sample weight ATE <- weighted.mean(DR.scores, subset.weights) sample.weights
 
   if (method == "AUTOC") {
     wtd.mean <- function(x) mean(x)
