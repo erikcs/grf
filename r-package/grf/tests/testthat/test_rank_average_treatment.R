@@ -62,11 +62,11 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   rate.dup <- rank_average_treatment_effect(cf, prio.dup, R = 0)
   qini.dup <- rank_average_treatment_effect(cf, prio.dup, method = "QINI", R = 0)
 
-  # Average the doubly robust scores within tied groups
+  # average the doubly robust scores within tied groups
   scores.by.prio <- split(DR.scores, prio.dup) # orders by prio in increasing order
   ties.count.by.prio <- lapply(scores.by.prio, length)
   mean.scores.by.prio <- lapply(scores.by.prio, mean)
-  # Scores in decreasing priority order
+  # scores in decreasing priority order
   scores.order <- rev(unlist(rep(mean.scores.by.prio, ties.count.by.prio)))
 
   TOC.dup <- rep(NA, n)
