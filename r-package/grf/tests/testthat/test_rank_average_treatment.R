@@ -113,3 +113,34 @@ test_that("rank_average_treatment_effect print runs", {
 
   expect_equal(1, 1)
 })
+
+test_that("cluster robust rank_average_treatment_effect is consistent", {
+  n <- 500
+  p <- 5
+  X <- matrix(rnorm(n * p), n, p)
+  W <- rbinom(n, 1, 0.5)
+  tau <- pmax(X[, 1], 0)
+  Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+
+  Xc <- rbind(X, X, X, X, X)
+  Wc <- c(W, W, W, W, W)
+  Yc <- c(Y, Y, Y, Y, Y)
+  clust <- rep(1:n, 5)
+
+  cf <- causal_forest(X, Y, W, num.trees = 250)
+  cf.clust <- causal_forest(Xc, Yc, Wc, clusters = clust, num.trees = 250)
+  prio <- runif(n)
+  prio.clust <- rep(prio, 5)
+
+  autoc <- rank_average_treatment_effect(cf, prio, method = "AUTOC", R = 150)
+  qini <- rank_average_treatment_effect(cf, prio, method = "QINI", R = 150)
+
+  autoc.clust <- rank_average_treatment_effect(cf.clust, prio.clust, method = "AUTOC", R = 150)
+  qini.clust <- rank_average_treatment_effect(cf.clust, prio.clust, method = "QINI", R = 150)
+
+  expect_equal(autoc[["estimate"]], autoc.clust[["estimate"]], tolerance = 0.05)
+  expect_equal(autoc[["std.err"]], autoc.clust[["std.err"]], tolerance = 0.02)
+
+  expect_equal(qini[["estimate"]], qini.clust[["estimate"]], tolerance = 0.05)
+  expect_equal(qini[["std.err"]], qini.clust[["std.err"]], tolerance = 0.02)
+})
