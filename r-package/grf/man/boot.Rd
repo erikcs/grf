@@ -31,6 +31,5 @@ https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
 }
 \references{
 Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
- R package version 1.3-28.
 }
 \keyword{internal}
