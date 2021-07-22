@@ -190,9 +190,6 @@ rank_average_treatment_effect <- function(forest,
   output
 }
 
-
-# TODO: move to plot.R when done
-
 #' Plot the Targeting Operator Characteristic curve.
 #' @param x The output of rank_average_treatment_effect.
 #' @param ... Additional arguments passed to plot.default.
@@ -214,8 +211,6 @@ plot.rank_average_treatment_effect <- function(x, ...) {
   lines(q, ub, col = "black", lty = 2)
   lines(q, lb, col = "black", lty = 2)
 }
-
-# TODO: move to print.R when done
 
 #' Print the Rank-Weighted Average Treatment Effect (RATE).
 #' @param x The output of rank_average_treatment_effect.
