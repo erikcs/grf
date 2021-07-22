@@ -110,3 +110,26 @@ test_that("cluster robust rank_average_treatment_effect is consistent", {
   expect_equal(qini[["estimate"]], qini.clust[["estimate"]], tolerance = 0.05)
   expect_equal(qini[["std.err"]], qini.clust[["std.err"]], tolerance = 0.02)
 })
+
+test_that("internal bootstrap function `boot` works as expected", {
+  n <- 50
+  mu <- 1 + rnorm(n)
+  clust <- 1:n
+
+  statistic <- function(data, indices) {
+    mean(data[indices, 1])
+  }
+
+  lm <- lm(mu ~ 1)
+  lmt <- lmtest::coeftest(lm, vcov = sandwich::vcovCL, type = "HC", cluster = clust)
+  boot.output <- boot(data.frame(mu), statistic, R = 250, clusters = clust, half.sample = FALSE)
+  expect_equal(sd(boot.output$t), lmt[1, "Std. Error"], tolerance = 0.02)
+
+  mu.cl <- c(mu, mu, mu, mu)
+  clust.cl <- rep(1:n, 4)
+
+  lm.cl <- lm(mu.cl ~ 1)
+  lmt.cl <- lmtest::coeftest(lm.cl, vcov = sandwich::vcovCL, type = "HC", cluster = clust.cl)
+  boot.output.cl <- boot(data.frame(mu.cl), statistic, R = 250, clusters = clust.cl, half.sample = FALSE)
+  expect_equal(sd(boot.output.cl$t), lmt.cl[1, "Std. Error"], tolerance = 0.02)
+})
