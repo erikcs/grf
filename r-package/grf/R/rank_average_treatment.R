@@ -121,8 +121,14 @@ rank_average_treatment_effect <- function(forest,
   if (is.unsorted(q) || (anyDuplicated(q) != 0) || min(q) <= 0 || max(q) != 1) {
     stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
   }
-  if (min(temp <- floor(floor(length(subset) / 2) * q)) == 0 || anyDuplicated(temp) != 0) {
-    stop("Provided `q` grid is too dense to uniquely assign each unit to a bucket.")
+  samples.by.cluster <- split(seq_along(subset.clusters), subset.clusters)
+  n.half <- floor(length(samples.by.cluster) / 2)
+  # lower bound on number of units in half-sample bootstrap. Equal to n.half when each unit its own cluster.
+  smallest.bs.n <- sum(lengths(samples.by.cluster)[order(lengths(samples.by.cluster))][1:n.half])
+  grid.bucket.size <- floor(smallest.bs.n * q)
+  if (min(grid.bucket.size) == 0 || anyDuplicated(grid.bucket.size) != 0) {
+    stop(paste0("Provided `q` grid is too dense to uniquely assign each unit to a bucket ",
+                "(or some clusters contains too few units)."))
   }
 
   # For all supported forest types, DR.scores is a n-length vector
