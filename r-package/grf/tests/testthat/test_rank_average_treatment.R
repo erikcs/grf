@@ -32,13 +32,33 @@ test_that("rank_average_treatment_effect works as expected", {
 })
 
 test_that("rank_average_treatment_effect agrees with plain brute-force calculation", {
-  # ...
-  # make a handful test cases with/wo ties where you do the straight forward
-  # brute force calculation of all estimates and check they agree with
-  # the `rank_average_treatment_effect` output
+  n <- 50
+  p <- 5
+  X <- matrix(rnorm(n * p), n, p)
+  W <- rbinom(n, 1, 0.5)
+  tau <- pmax(X[, 1], 0)
+  Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+  cf <- causal_forest(X, Y, W, num.trees = 250)
+  DR.scores <- get_scores(cf)
 
+  # Unique priorities
+  prio <- sample(1:n)
+  rate <- rank_average_treatment_effect(cf, prio, R = 0)
+  qini <- rank_average_treatment_effect(cf, prio, method = "QINI", R = 0)
 
-  expect_equal(1, 1)
+  sort.idx <- order(prio, decreasing = TRUE)
+  TOC <- rep(NA, n)
+  for (i in 1:n) {
+    TOC[i] <- mean(DR.scores[sort.idx[1:i]]) - mean(DR.scores)
+  }
+  RATE <- mean(TOC)
+  QINI <- weighted.mean(TOC, 1:n)
+
+  expect_equal(rate[["estimate"]], RATE)
+  expect_equal(qini[["estimate"]], QINI)
+
+  # Duplicate priorities
+
 })
 
 test_that("cluster robust rank_average_treatment_effect is consistent", {
