@@ -13,7 +13,7 @@ boot(data, statistic, R, clusters, half.sample = TRUE, ...)
 
 \item{R}{The number of bootstrap replications.}
 
-\item{clusters}{Cluster assignment, setting to 1:N corresponds to an ordinary unclustered bootstrap.}
+\item{clusters}{Integer vector of cluster assignment, setting to 1:N corresponds to an ordinary unclustered bootstrap.}
 
 \item{half.sample}{Whether to do half sample boostrap (half the clusters are drawn). Default is TRUE.}
 
