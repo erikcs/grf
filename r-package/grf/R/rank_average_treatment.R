@@ -224,7 +224,7 @@ print.rank_average_treatment_effect <- function(x, ...) {
 #' @param R The number of bootstrap replications.
 #' @param clusters Integer vector of cluster assignment, setting to 1:N corresponds to an ordinary unclustered bootstrap.
 #' @param half.sample Whether to do half sample boostrap (half the clusters are drawn). Default is TRUE.
-#' @param ... Additional arguments (currently ignored).
+#' @param ... Additional arguments passed on to statistic.
 #'
 #' @references Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
 #'  R package version 1.3-28.
@@ -242,9 +242,9 @@ boot <- function(data, statistic, R, clusters, half.sample = TRUE, ...) {
     index.list <- replicate(R, unlist(samples.by.cluster[sample.int(n, replace = TRUE)], use.names = FALSE), simplify = FALSE)
   }
 
-  t0 <- statistic(data, seq_len(NROW(data)))
+  t0 <- statistic(data, seq_len(NROW(data)), ...)
 
-  res <- lapply(seq_len(R), function(i) statistic(data, index.list[[i]]))
+  res <- lapply(seq_len(R), function(i) statistic(data, index.list[[i]], ...))
   t <- matrix(, R, length(t0))
   for (r in seq_len(R)) {
     t[r, ] <- res[[r]]
