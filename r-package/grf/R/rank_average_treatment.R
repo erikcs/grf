@@ -242,7 +242,7 @@ boot <- function(data, statistic, R, clusters, half.sample = TRUE, ...) {
     index.list <- replicate(R, unlist(samples.by.cluster[sample.int(n, replace = TRUE)], use.names = FALSE), simplify = FALSE)
   }
 
-  t0 <- statistic(data, seq_len(n))
+  t0 <- statistic(data, seq_len(NROW(data)))
 
   res <- lapply(seq_len(R), function(i) statistic(data, index.list[[i]]))
   t <- matrix(, R, length(t0))
