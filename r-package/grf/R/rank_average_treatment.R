@@ -147,10 +147,25 @@ rank_average_treatment_effect <- function(forest,
   }
 
   # Compute estimates, a function to be passed on to boostrap routine.
-  # @data: a data.frame with the original data, DR.scores and priority scores.
+  # @data: a data.frame with the original data. column 1: DR.scores, column 2: priority scores (factor)
   # @indices: a vector of indices which define the bootstrap sample.
   # @returns: an estimate of RATE, together with the TOC curve.
   estimate <- function(data, indices) {
+    # let q be a fraction in (0, 1].
+    # we have 1) TOC(q; Sj) = 1/[qn] sum_{i=1}^{[qn]} Gamma_{i(j)} - ATE
+    # and 2) RATE = 1/n sum_{i=1}^{n} TOC(i/n; Sj)
+    # For boostrapping the TOC curve, we fix q on some grid q'.
+    # For estimating the RATE we set 1/n <= q <= 1.
+    # Observations:
+    # a) the entire TOC curve can be computed as a cumulative sum of sorted DR.scores.
+    # b) taking ties into account amounts to using the average DR.scores within each
+    # tied group instead of the individual DR.scores.
+    # So the steps are:
+    # Compute average DR.scores by priority group in increasing order: DR.scores',
+    # repeat the possibly tied entries with the number of duplicates.
+    # Take the cumsum of this divided by ni to get the TOC curve. Take a (weighted) average
+    # of this to get RATE. This is what is being done below, using R's fastest primitives for
+    # quick aggregation and grouping (using for example "rowsum"),
     nq <- floor(length(indices) * q)
     grid.id <- rep.int(nq, c(nq[1], diff(nq)))
 
@@ -158,6 +173,7 @@ rank_average_treatment_effect <- function(forest,
     group.length <- tabulate(prio, nlevels(prio))
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
+
     DR.scores.sorted <- rev(rep.int(grp.means, group.length))
     DR.scores.sorted.grid <- rowsum(DR.scores.sorted, grid.id)
 
