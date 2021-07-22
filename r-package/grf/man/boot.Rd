@@ -26,8 +26,8 @@ A list with the original estimate t0, and bootstrap estimates t.
 }
 \description{
 Adopted from the `boot` function in the boostrap package with clusters added.
-A future TODO could be to add parallel
-https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
+A future TODO could be to add parallel (not necessarily worth it)
+https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
 }
 \references{
 Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
