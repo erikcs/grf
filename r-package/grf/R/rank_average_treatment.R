@@ -79,9 +79,6 @@ rank_average_treatment_effect <- function(forest,
                                           debiasing.weights = NULL,
                                           compliance.score = NULL,
                                           num.trees.for.weights = 500) {
-  # TODO: ALPHA in docstring is an unfortunate name collision with GRF forest weights...
-  # TODO: allow a vector of scores instead of forest as well?
-  # TODO: could estimate both AUTOC and QINI at the same time at practically zero cost...?
   method <- match.arg(method)
   cluster.se <- length(forest$clusters) > 0
   clusters <- if (cluster.se) {
