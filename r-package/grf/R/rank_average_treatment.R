@@ -136,13 +136,9 @@ rank_average_treatment_effect <- function(forest,
   DR.scores <- get_scores(forest, subset = subset, debiasing.weights = debiasing.weights,
                           compliance.score = compliance.score, num.trees.for.weights = num.trees.for.weights)
 
-  # ATE <- weighted.mean(DR.scores, subset.weights) sample.weights TODO
-
   # *** Compute the TOC and RATE ***
 
-  # TODO: bake in sample weight
-  # TODO: complete rest of this
-  # TODO: is the bootsrapped TOC correct?
+  # TODO: bake in sample weight ATE <- weighted.mean(DR.scores, subset.weights) sample.weights TODO
 
   if (method == "AUTOC") {
     wtd.mean <- function(x) mean(x)
