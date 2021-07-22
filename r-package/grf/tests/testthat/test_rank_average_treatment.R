@@ -1,6 +1,3 @@
-# install With:
-# devtools::install_github("erikcs/grf", subdir = "r-package/grf", ref = "RATE"))
-
 test_that("rank_average_treatment_effect works as expected", {
   n <- 500
   p <- 5
