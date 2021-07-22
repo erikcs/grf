@@ -216,7 +216,7 @@ print.rank_average_treatment_effect <- function(x, ...) {
 
 #' Simple clustered bootstrap.
 #'
-#' Adopted from the `boot` function in the boostrap package.
+#' Adopted from the `boot` function in the boostrap package with clusters added.
 #' A future TODO could be to add parallel
 #' https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
 #' @param data A data frame with the original data.
@@ -232,8 +232,8 @@ print.rank_average_treatment_effect <- function(x, ...) {
 boot <- function(data, statistic, R, clusters, half.sample = TRUE, ...) {
   samples.by.cluster <- split(seq_along(clusters), clusters)
   n <- length(samples.by.cluster) # number of clusters
-  if (n <= 1) {
-    stop("Cannot bootstrap sample of dim 1.")
+  if (n <= 1 || (half.sample && floor(n / 2) <= 1)) {
+    stop("Cannot bootstrap sample with only one effective unit of observation.")
   }
   if (half.sample) {
     n.bs <- floor(n / 2)

@@ -20,7 +20,7 @@ boot(data, statistic, R, clusters, half.sample = TRUE, ...)
 \item{...}{Additional arguments (currently ignored).}
 }
 \description{
-Adopted from the `boot` function in the boostrap package.
+Adopted from the `boot` function in the boostrap package with clusters added.
 A future TODO could be to add parallel
 https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
 }
