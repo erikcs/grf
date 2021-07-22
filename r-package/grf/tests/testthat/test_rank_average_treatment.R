@@ -18,58 +18,36 @@
 # test_file('tests/testthat/test_rank_average_treatment_effect.R')
 # you can add a `browser()` statement anywhere int he code and reload to step through code
 
-# test_that("behavior is locked in", {
-#   set.seed(42)
-#   p <- 6
-#   n <- 250
-#   X <- matrix(2 * runif(n * p) - 1, n, p)
-#   W <- rbinom(n, 1, 0.5)
-#   Y <- (X[, 1] > 0) * (2 * W - 1) + 2 * rnorm(n)
-#   cf <- causal_forest(X, Y, W, num.trees = 200)
-#
-#   priorities1 <- sample(1:10, n, TRUE)
-#   priorities2 <- rep(1, n)
-#   priorities3 <- rnorm(n)
-#
-#   rate1 <- rank_average_treatment_effect(cf, priorities1, R = 100)
-#   rate2 <- rank_average_treatment_effect(cf, priorities2, R = 100)
-#   rate3 <- rank_average_treatment_effect(cf, priorities3, R = 100)
-#
-#   expect_equal(rate1$estimate, -0.05186264, tol=1e-6)
-#   expect_equal(rate1$std.err, 0.4094249, tol=1e-6)
-#
-#   expect_equal(rate2$estimate, -1.779021e-15, tol=1e-6)
-#   expect_equal(rate2$std.err, 0.3193724, tol=1e-6)
-#
-#   expect_equal(rate3$estimate, -1.065669, tol=1e-6)
-#   expect_equal(rate3$std.err, 0.5038779, tol=1e-6)
-# })
+# Do many common sense checks of the form
+# check with causal forest (should be similar to multi_arm_causal_forest) + maybe another forest,
+# check with forest with sample weights and clusters
+# check when passing optional arguments like `subset` gives reasonable results
+# (i.e. subset1 = all with super high prio vs subset2 all with super low prio are both high/low)
+# if you provide oracle prio scores, then rank_average_treatment_effect output is sensible
+# rank_average_treatment_effect output is equal to the true oracle val +/- 3 * SE of the avg.
+# pathological input i.e all scores the same, or just 2 groups, kinds of bad "prio" input that could break a bootstrap (i.e just one cluster is drawn)
+# prio =random  should be very close to `average_treatment_effect`
+# sample weights: output should be invariant to scaling of the weights
+# try to think of some other sample weight invariances... (can be tricky since you can't
+# test that duplicating some samples gives the exact same forest result as giving those samples weight=2)
+
+# Last entry TOC always ZERO?
+# TOC curve at ties = FLAT?
 
 test_that("rank_average_treatment_effect works as expected", {
-  p <- 6
-  n <- 200
-  X <- matrix(2 * runif(n * p) - 1, n, p)
+  n <- 500
+  p <- 5
+  X <- matrix(rnorm(n * p), n, p)
   W <- rbinom(n, 1, 0.5)
-  Y <- (X[, 1] > 0) * (2 * W - 1) + 2 * rnorm(n)
-  cf <- causal_forest(X, Y, W, num.trees = 200)
-  priorities <- sample(1:10, n, TRUE)
+  tau <- pmax(X[, 1], 0)
+  Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+  cf <- causal_forest(X, Y, W, num.trees = 250)
+  prio <- tau
 
-  rate <- rank_average_treatment_effect(cf, priorities)
-  # Do many common sense checks of the form
-  # check with causal forest (should be similar to multi_arm_causal_forest) + maybe another forest,
-  # check with forest with sample weights and clusters
-  # check when passing optional arguments like `subset` gives reasonable results
-  # (i.e. subset1 = all with super high prio vs subset2 all with super low prio are both high/low)
-  # if you provide oracle prio scores, then rank_average_treatment_effect output is sensible
-  # rank_average_treatment_effect output is equal to the true oracle val +/- 3 * SE of the avg.
-  # pathological input i.e all scores the same, or just 2 groups, kinds of bad "prio" input that could break a bootstrap (i.e just one cluster is drawn)
-  # prio =random  should be very close to `average_treatment_effect`
-  # sample weights: output should be invariant to scaling of the weights
-  # try to think of some other sample weight invariances... (can be tricky since you can't
-  # test that duplicating some samples gives the exact same forest result as giving those samples weight=2)
+  rate <- rank_average_treatment_effect(cf, prio)
 
-  # Last entry TOC always ZERO?
-  # TOC curve at ties = FLAT?
+  print(rate)
+  plot(rate)
 
   expect_equal(1, 1)
 })
@@ -80,36 +58,6 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   # brute force calculation of all estimates and check they agree with
   # the `rank_average_treatment_effect` output
 
-
-  expect_equal(1, 1)
-})
-
-test_that("rank_average_treatment_effect plot runs", {
-  p <- 6
-  n <- 200
-  X <- matrix(2 * runif(n * p) - 1, n, p)
-  W <- rbinom(n, 1, 0.5)
-  Y <- (X[, 1] > 0) * (2 * W - 1) + 2 * rnorm(n)
-  cf <- causal_forest(X, Y, W, num.trees = 200)
-  priorities <- sample(1:10, n, TRUE)
-
-  rate <- rank_average_treatment_effect(cf, priorities)
-  plot(rate)
-
-  expect_equal(1, 1)
-})
-
-test_that("rank_average_treatment_effect print runs", {
-  p <- 6
-  n <- 200
-  X <- matrix(2 * runif(n * p) - 1, n, p)
-  W <- rbinom(n, 1, 0.5)
-  Y <- (X[, 1] > 0) * (2 * W - 1) + 2 * rnorm(n)
-  cf <- causal_forest(X, Y, W, num.trees = 200)
-  priorities <- sample(1:10, n, TRUE)
-
-  rate <- rank_average_treatment_effect(cf, priorities)
-  print(rate)
 
   expect_equal(1, 1)
 })
