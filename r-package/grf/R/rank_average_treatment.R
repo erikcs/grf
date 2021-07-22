@@ -106,6 +106,9 @@ rank_average_treatment_effect <- function(forest,
       stop("If specified, debiasing.weights must be a vector of length n or the subset length.")
     }
   }
+  if (anyNA(priorities)) {
+    stop("`priorities` contains missing values.")
+  }
   if (length(priorities) == NROW(forest$Y.orig)) {
     priorities <- as.factor(priorities[subset]) # store as factor, more efficient for large |S| with many ties.
   } else if (length(priorities) != length(subset)) {
@@ -171,7 +174,11 @@ rank_average_treatment_effect <- function(forest,
   }
   boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, clusters, half.sample = TRUE)
   point.estimate <- boot.output[["t0"]]
-  std.errors <- apply(boot.output[["t"]], 2, sd) # ensure invariance: should always be >= 0.
+  std.errors <- apply(boot.output[["t"]], 2, sd)
+  # ensure invariance: always >= 0
+  if (R < 2) {
+    std.errors[] <- 0
+  }
 
   output <- list()
   class(output) <- "rank_average_treatment_effect"
