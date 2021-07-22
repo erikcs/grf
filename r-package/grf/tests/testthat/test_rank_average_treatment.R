@@ -42,14 +42,27 @@ test_that("rank_average_treatment_effect works as expected", {
   tau <- pmax(X[, 1], 0)
   Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
   cf <- causal_forest(X, Y, W, num.trees = 250)
-  prio <- tau
 
+  prio <- get_scores(cf)
   rate <- rank_average_treatment_effect(cf, prio)
+  expect_equal(rate$TOC[nrow(rate$TOC), "estimate"], 0, tolerance = 1e-10) # Last TOC curve entry = zero.
+  expect_equal(rate$TOC[nrow(rate$TOC), "std.err"], 0, tolerance = 1e-10) # Last TOC curve entry = zero.
+
+  rate.lo <- rank_average_treatment_effect(cf, prio, subset = prio < 0)
+  expect_gt(rate[["estimate"]], rate.lo[["estimate"]])
+
+  rate.all.eq <- rank_average_treatment_effect(cf, rep(1, n))
+  expect_equal(rate.all.eq[["estimate"]], 0, tolerance = 1e-10)
+
+  rand.prio <- sample(1:100, n, TRUE)
+  autoc.rand <- rank_average_treatment_effect(cf, rand.prio, R = 150)
+  expect_equal(autoc.rand[["estimate"]], 0, tolerance = 3 * autoc.rand[["std.err"]])
+
+  qini.rand <- rank_average_treatment_effect(cf, rand.prio, method = "QINI", R = 150)
+  expect_equal(qini.rand[["estimate"]], 0, tolerance = 3 * qini.rand[["std.err"]])
 
   print(rate)
   plot(rate)
-
-  expect_equal(1, 1)
 })
 
 test_that("rank_average_treatment_effect agrees with plain brute-force calculation", {
