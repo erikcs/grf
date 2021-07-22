@@ -250,7 +250,6 @@ print.rank_average_treatment_effect <- function(x, ...) {
 #' @return A list with the original estimate t0, and bootstrap estimates t.
 #'
 #' @references Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
-#'  R package version 1.3-28.
 #'
 #' @keywords internal
 boot <- function(data, statistic, R, clusters, half.sample = TRUE, ...) {
