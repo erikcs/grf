@@ -27,7 +27,7 @@ test_that("rank_average_treatment_effect works as expected", {
   qini.rand <- rank_average_treatment_effect(cf, rand.prio, method = "QINI", R = 150)
   expect_equal(qini.rand[["estimate"]], 0, tolerance = 3 * qini.rand[["std.err"]])
 
-  print(rate)
+  capture.output(print(rate))
   plot(rate)
 })
 
