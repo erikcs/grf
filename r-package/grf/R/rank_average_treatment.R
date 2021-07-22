@@ -166,7 +166,7 @@ rank_average_treatment_effect <- function(forest,
     DR.scores.sorted.grid <- rowsum(DR.scores.sorted, grid.id)
 
     TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - mean(DR.scores.sorted)
-    TOC.grid <- cumsum(DR.scores.sorted.grid) / nq - mean(DR.scores.sorted.grid)
+    TOC.grid <- cumsum(DR.scores.sorted.grid) / nq - mean(DR.scores.sorted)
 
     RATE <- wtd.mean(TOC)
     c(RATE, TOC.grid)
