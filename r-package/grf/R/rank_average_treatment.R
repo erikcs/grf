@@ -222,6 +222,7 @@ print.rank_average_treatment_effect <- function(x, ...) {
 #' Adopted from the `boot` function in the boostrap package with clusters added.
 #' A future TODO could be to add parallel
 #' https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
+#'
 #' @param data A data frame with the original data.
 #' @param statistic A function computing estimate(s) with signature (data, indices, ...) where
 #' data is the original data, and indices a vector which defines the bootstrap sample.
@@ -230,6 +231,7 @@ print.rank_average_treatment_effect <- function(x, ...) {
 #'  unclustered bootstrap.
 #' @param half.sample Whether to do half sample boostrap (half the clusters are drawn). Default is TRUE.
 #' @param ... Additional arguments passed on to statistic.
+#' @return A list with the original estimate t0, and boostrap estimates t.
 #'
 #' @references Angelo Canty and Brian Ripley (2021). boot: Bootstrap R (S-Plus) Functions.
 #'  R package version 1.3-28.

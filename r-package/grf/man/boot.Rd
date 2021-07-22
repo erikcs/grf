@@ -21,6 +21,9 @@ unclustered bootstrap.}
 
 \item{...}{Additional arguments passed on to statistic.}
 }
+\value{
+A list with the original estimate t0, and boostrap estimates t.
+}
 \description{
 Adopted from the `boot` function in the boostrap package with clusters added.
 A future TODO could be to add parallel
