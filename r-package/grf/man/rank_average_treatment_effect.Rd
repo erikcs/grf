@@ -26,10 +26,10 @@ data.}
 \item{method}{The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 identity or linear weighting. Default is `AUTOC`.}
 
-\item{q}{The grid q TODO}
+\item{q}{The grid q to compute the TOC curve on. Defaults is
+(10\%, 20\%, ...,90\%,  100\%).}
 
-\item{R}{Optional number of bootstrap replicates for SEs (default is 0, no SEs. Requires)
-the optional `boot` library. todo}
+\item{R}{Optional number of bootstrap replicates for SEs. Default is 200.}
 
 \item{subset}{Specifies subset of the training examples over which we
 estimate the ATE. WARNING: For valid statistical performance,

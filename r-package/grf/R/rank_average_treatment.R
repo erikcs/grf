@@ -24,9 +24,9 @@
 #'  data.
 #' @param method The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 #'  identity or linear weighting. Default is `AUTOC`.
-#' @param q The grid q TODO
-#' @param R Optional number of bootstrap replicates for SEs (default is 0, no SEs. Requires)
-#'  the optional `boot` library. todo
+#' @param q The grid q to compute the TOC curve on. Defaults is
+#'  (10\%, 20\%, ...,90\%,  100\%).
+#' @param R Optional number of bootstrap replicates for SEs. Default is 200.
 #' @param subset Specifies subset of the training examples over which we
 #'               estimate the ATE. WARNING: For valid statistical performance,
 #'               the subset should be defined only using features Xi, not using
@@ -167,10 +167,12 @@ rank_average_treatment_effect <- function(forest,
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
     DR.scores.sorted <- rev(rep.int(grp.means, group.length))
     DR.scores.sorted.grid <- rowsum(DR.scores.sorted, grid.id)
-    TOC <- cumsum(DR.scores.sorted.grid) / nq - mean(DR.scores.sorted)
+
+    TOC <- cumsum(DR.scores.sorted) / seq_along(DR.scores.sorted) - mean(DR.scores.sorted)
+    TOC.grid <- cumsum(DR.scores.sorted.grid) / nq - mean(DR.scores.sorted.grid)
 
     RATE <- wtd.mean(TOC)
-    c(RATE, TOC)
+    c(RATE, TOC.grid)
   }
   boot.output <- boot(data.frame(DR.scores, priorities), estimate, R, subset.clusters, half.sample = TRUE)
   point.estimate <- boot.output[["t0"]]
