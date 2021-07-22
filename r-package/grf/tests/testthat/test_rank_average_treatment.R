@@ -43,7 +43,7 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
 
   # 1. Unique priorities
   prio <- runif(n)
-  rate <- rank_average_treatment_effect(cf, prio, R = 0)
+  autoc <- rank_average_treatment_effect(cf, prio, R = 0)
   qini <- rank_average_treatment_effect(cf, prio, method = "QINI", R = 0)
 
   sort.idx <- order(prio, decreasing = TRUE)
@@ -51,15 +51,15 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   for (i in 1:n) {
     TOC[i] <- mean(DR.scores[sort.idx[1:i]]) - mean(DR.scores)
   }
-  RATE <- mean(TOC)
+  AUTOC <- mean(TOC)
   QINI <- weighted.mean(TOC, 1:n)
 
-  expect_equal(rate[["estimate"]], RATE)
+  expect_equal(autoc[["estimate"]], AUTOC)
   expect_equal(qini[["estimate"]], QINI)
 
   # 2. Duplicate priorities
   prio.dup <- sample(1:20, n, replace = TRUE)
-  rate.dup <- rank_average_treatment_effect(cf, prio.dup, R = 0)
+  autoc.dup <- rank_average_treatment_effect(cf, prio.dup, R = 0)
   qini.dup <- rank_average_treatment_effect(cf, prio.dup, method = "QINI", R = 0)
 
   # average the doubly robust scores within tied groups
@@ -73,10 +73,10 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   for (i in 1:n) {
     TOC.dup[i] <- mean(scores.order[1:i]) - mean(DR.scores)
   }
-  RATE.dup <- mean(TOC.dup)
+  AUTOC.dup <- mean(TOC.dup)
   QINI.dup <- weighted.mean(TOC.dup, 1:n)
 
-  expect_equal(rate.dup[["estimate"]], RATE.dup)
+  expect_equal(autoc.dup[["estimate"]], AUTOC.dup)
   expect_equal(qini.dup[["estimate"]], QINI.dup)
 })
 
