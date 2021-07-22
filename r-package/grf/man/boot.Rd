@@ -9,7 +9,8 @@ boot(data, statistic, R, clusters, half.sample = TRUE, ...)
 \arguments{
 \item{data}{A data frame with the original data.}
 
-\item{statistic}{A function computing estimate(s) from data.}
+\item{statistic}{A function computing estimate(s) with signature (data, indices, ...) where
+data is the original data, and indices a vector which defines the bootstrap sample.}
 
 \item{R}{The number of bootstrap replications.}
 

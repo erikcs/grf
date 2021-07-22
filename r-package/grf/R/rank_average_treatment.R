@@ -223,7 +223,8 @@ print.rank_average_treatment_effect <- function(x, ...) {
 #' A future TODO could be to add parallel
 #' https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf (not necessarily worth it)
 #' @param data A data frame with the original data.
-#' @param statistic A function computing estimate(s) from data.
+#' @param statistic A function computing estimate(s) with signature (data, indices, ...) where
+#' data is the original data, and indices a vector which defines the bootstrap sample.
 #' @param R The number of bootstrap replications.
 #' @param clusters Integer vector of cluster assignment, setting to 1:N corresponds to an ordinary
 #'  unclustered bootstrap.

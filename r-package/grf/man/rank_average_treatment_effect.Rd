@@ -9,7 +9,7 @@ rank_average_treatment_effect(
   priorities,
   method = c("AUTOC", "QINI"),
   q = seq(0.1, 1, by = 0.1),
-  R = 5,
+  R = 200,
   subset = NULL,
   debiasing.weights = NULL,
   compliance.score = NULL,
