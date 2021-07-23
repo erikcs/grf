@@ -20,11 +20,11 @@
 #'
 #' @param forest The trained forest.
 #' @param priorities A vector of treatment prioritorization scores S(Xi) for the units used to train the forest.
-#'  WARNING: for valid statistical performance, these scores should be obtained independently from the training
-#'  data.
+#'  WARNING: for valid statistical performance, these scores should be obtained independently from the forest
+#'  training data.
 #' @param method The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 #'  identity or linear weighting. Default is `AUTOC`.
-#' @param q The grid q to compute the TOC curve on. Defaults is
+#' @param q The grid q to compute the TOC curve on. Default is
 #'  (10\%, 20\%, ...,90\%,  100\%).
 #' @param R Number of bootstrap replicates for SEs. Default is 150.
 #' @param subset Specifies subset of the training examples over which we
