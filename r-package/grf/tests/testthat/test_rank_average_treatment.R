@@ -54,8 +54,8 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   AUTOC <- mean(TOC)
   QINI <- weighted.mean(TOC, 1:n)
 
-  expect_equal(autoc[["estimate"]], AUTOC)
-  expect_equal(qini[["estimate"]], QINI)
+  expect_equal(autoc[["estimate"]], AUTOC, tolerance = 1e-10)
+  expect_equal(qini[["estimate"]], QINI, tolerance = 1e-10)
 
   # 2. Duplicate priorities
   prio.dup <- sample(1:20, n, replace = TRUE)
@@ -76,8 +76,8 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   AUTOC.dup <- mean(TOC.dup)
   QINI.dup <- weighted.mean(TOC.dup, 1:n)
 
-  expect_equal(autoc.dup[["estimate"]], AUTOC.dup)
-  expect_equal(qini.dup[["estimate"]], QINI.dup)
+  expect_equal(autoc.dup[["estimate"]], AUTOC.dup, tolerance = 1e-10)
+  expect_equal(qini.dup[["estimate"]], QINI.dup, tolerance = 1e-10)
 })
 
 test_that("cluster robust rank_average_treatment_effect is consistent", {
