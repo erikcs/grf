@@ -122,7 +122,7 @@ rank_average_treatment_effect <- function(forest,
   if (!all(forest$W.orig %in% c(0, 1))) {
     stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
   }
-  if (is.unsorted(q) || (anyDuplicated(q) != 0) || min(q) <= 0 || max(q) != 1) {
+  if (is.unsorted(q) || anyDuplicated(q) || min(q) <= 0 || max(q) != 1) {
     stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
   }
   samples.by.cluster <- split(seq_along(subset.clusters), subset.clusters)
@@ -130,7 +130,7 @@ rank_average_treatment_effect <- function(forest,
   # lower bound on number of units in half-sample bootstrap. Equal to n.half when each unit its own cluster.
   smallest.bs.n <- sum(lengths(samples.by.cluster)[order(lengths(samples.by.cluster))][1:n.half])
   smallest.grid.bucket.size <- floor(smallest.bs.n * q)
-  if (min(smallest.grid.bucket.size) == 0 || anyDuplicated(smallest.grid.bucket.size) != 0) {
+  if (min(smallest.grid.bucket.size) == 0 || anyDuplicated(smallest.grid.bucket.size)) {
     stop(paste0("Provided `q` grid is too dense to uniquely assign each unit to a bucket ",
                 "(or some clusters contains too few units)."))
   }
