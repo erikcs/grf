@@ -125,8 +125,8 @@ rank_average_treatment_effect <- function(forest,
   n.half <- floor(length(samples.by.cluster) / 2)
   # lower bound on number of units in half-sample bootstrap. Equal to n.half when each unit its own cluster.
   smallest.bs.n <- sum(lengths(samples.by.cluster)[order(lengths(samples.by.cluster))][1:n.half])
-  grid.bucket.size <- floor(smallest.bs.n * q)
-  if (min(grid.bucket.size) == 0 || anyDuplicated(grid.bucket.size) != 0) {
+  smallest.grid.bucket.size <- floor(smallest.bs.n * q)
+  if (min(smallest.grid.bucket.size) == 0 || anyDuplicated(smallest.grid.bucket.size) != 0) {
     stop(paste0("Provided `q` grid is too dense to uniquely assign each unit to a bucket ",
                 "(or some clusters contains too few units)."))
   }
