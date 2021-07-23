@@ -77,21 +77,25 @@ say when you want AUTOC and when you want QINI.
 }
 \examples{
 \donttest{
-# Train a causal forest.
-n <- 500
+# Train a causal forest to estimate a priority ranking.
+n <- 1500
 p <- 5
 X <- matrix(rnorm(n * p), n, p)
 W <- rbinom(n, 1, 0.5)
-tau <- pmax(X[, 1], 0)
-Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
-c.forest <- causal_forest(X, Y, W)
-S <- tau
+Y <- pmax(X[, 1], 0) * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+train <- sample(1:n, n / 2)
+cf.priority <- causal_forest(X[train, ], Y[train], W[train])
 
-# Estimate the RATE with AUTOC weighting.
-rate <- rank_average_treatment_effect(c.forest, S)
-# Print the RATE estimate.
+# Compute a prioritorization based on estimated effect quantiles.
+tau.hats <- predict(cf.priority, X[-train, ])$predictions
+priority <- cut(tau.hats, breaks = c(-Inf, quantile(tau.hats), Inf))
+
+# Estimate RATE on held out data.
+cf <- causal_forest(X[-train, ], Y[-train], W[-train])
+rate <- rank_average_treatment_effect(cf, priority)
 rate
-# Plot the Targeting Operator Characteristic.
+
+# Plot the Targeting Operator Characteristic curve.
 plot(rate)
 }
 
