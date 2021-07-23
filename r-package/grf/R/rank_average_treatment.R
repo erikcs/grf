@@ -20,7 +20,7 @@
 #'
 #' @param forest The trained forest.
 #' @param priorities A vector of treatment prioritorization scores S(Xi) for the units used to train the forest.
-#'  WARNING: for valid statistical performance, these scores should be obtained independently from the forest
+#'  WARNING: for valid statistical performance, these scores should be constructed independently from the forest
 #'  training data.
 #' @param method The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 #'  identity or linear weighting. Default is `AUTOC`.

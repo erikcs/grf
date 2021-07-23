@@ -20,7 +20,7 @@ rank_average_treatment_effect(
 \item{forest}{The trained forest.}
 
 \item{priorities}{A vector of treatment prioritorization scores S(Xi) for the units used to train the forest.
-WARNING: for valid statistical performance, these scores should be obtained independently from the forest
+WARNING: for valid statistical performance, these scores should be constructed independently from the forest
 training data.}
 
 \item{method}{The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
