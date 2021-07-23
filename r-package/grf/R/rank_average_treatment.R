@@ -60,7 +60,7 @@
 #'
 #' # Compute a prioritorization based on estimated effect quantiles.
 #' tau.hats <- predict(cf.priority, X[-train, ])$predictions
-#' priority <- cut(tau.hats, breaks = c(-Inf, quantile(tau.hats), Inf))
+#' priority <- cut(tau.hats, breaks = quantile(tau.hats), include.lowest = TRUE)
 #'
 #' # Estimate RATE on held out data.
 #' cf <- causal_forest(X[-train, ], Y[-train], W[-train])
