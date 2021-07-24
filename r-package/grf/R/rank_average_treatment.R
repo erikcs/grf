@@ -104,7 +104,6 @@ rank_average_treatment_effect <- function(forest,
   if (length(unique(subset.clusters)) <= 1) {
     stop("The specified subset must contain units from more than one cluster.")
   }
-
   if (!is.null(debiasing.weights)) {
     if (length(debiasing.weights) == NROW(forest$Y.orig)) {
       debiasing.weights <- debiasing.weights[subset]
