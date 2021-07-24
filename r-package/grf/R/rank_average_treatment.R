@@ -71,8 +71,13 @@
 #' plot(rate)
 #' }
 #'
-#' @return A list with elements `estimate`: the RATE estimate, `std.err`: boostrapped standard error
-#'  of RATE, `TOC`: the Targeting Operator Characteristic curve, along with bootstrapped standard errors.
+#' @return A list of class `rank_average_treatment_effect` with elements \itemize{
+#'  \item estimate: the RATE estimate.
+#'  \item std.err: bootstrapped standard error of RATE.
+#'  \item TOC: a data.frame with the Targeting Operator Characteristic curve
+#'    estimated on grid q, along with bootstrapped SEs.
+#'  \item method: the type of RATE.
+#' }
 #' @export
 rank_average_treatment_effect <- function(forest,
                                           priorities,

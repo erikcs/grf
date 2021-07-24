@@ -52,8 +52,13 @@ This is the number of trees used for this task. Note: this argument is only
 used when debiasing.weights = NULL.}
 }
 \value{
-A list with elements `estimate`: the RATE estimate, `std.err`: boostrapped standard error
- of RATE, `TOC`: the Targeting Operator Characteristic curve, along with bootstrapped standard errors.
+A list of class `rank_average_treatment_effect` with elements \itemize{
+ \item estimate: the RATE estimate.
+ \item std.err: bootstrapped standard error of RATE.
+ \item TOC: a data.frame with the Targeting Operator Characteristic curve
+   estimated on grid q, along with bootstrapped SEs.
+ \item method: the type of RATE.
+}
 }
 \description{
 Consider a rule S(Xi) assigning scores to units in decreasing order of treatment prioritization.
