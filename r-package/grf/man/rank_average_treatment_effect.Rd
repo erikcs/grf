@@ -27,7 +27,7 @@ training data.}
 identity or linear weighting. Default is `AUTOC`.}
 
 \item{q}{The grid q to compute the TOC curve on. Default is
-(10\%, 20\%, ...,90\%,  100\%).}
+(10\%, 20\%, ..., 100\%).}
 
 \item{R}{Number of bootstrap replicates for SEs. Default is 150.}
 

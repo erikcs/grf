@@ -25,7 +25,7 @@
 #' @param method The type of RATE estimate, options are `AUTOC` or `QINI`, corresponding to
 #'  identity or linear weighting. Default is `AUTOC`.
 #' @param q The grid q to compute the TOC curve on. Default is
-#'  (10\%, 20\%, ...,90\%,  100\%).
+#'  (10\%, 20\%, ..., 100\%).
 #' @param R Number of bootstrap replicates for SEs. Default is 150.
 #' @param subset Specifies subset of the training examples over which we
 #'               estimate the ATE. WARNING: For valid statistical performance,
