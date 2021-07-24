@@ -121,7 +121,6 @@ rank_average_treatment_effect <- function(forest,
   } else if (length(priorities) != length(subset)) {
     stop("`priorities` must be a vector of length n or the subset length.")
   }
-
   if (!any(c("causal_forest", "instrumental_forest", "causal_survival_forest") %in% class(forest))) {
     stop("`rank_average_treatment_effect` is not implemented for this forest type.")
   }
