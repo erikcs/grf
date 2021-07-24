@@ -116,7 +116,8 @@ rank_average_treatment_effect <- function(forest,
     stop("`priorities` contains missing values.")
   }
   if (length(priorities) == NROW(forest$Y.orig)) {
-    priorities <- as.factor(priorities[subset]) # store as factor, more efficient `tabulate()` for large |S| with many ties.
+    # store as factor, more efficient `tabulate()` for large |S| with many ties.
+    priorities <- as.factor(priorities[subset])
   } else if (length(priorities) != length(subset)) {
     stop("`priorities` must be a vector of length n or the subset length.")
   }
