@@ -52,6 +52,7 @@ test_that("TOC grid works as expected", {
   autoc <- rate.full$estimate
   expect_equal(mean(rate.full$TOC$estimate), autoc, tolerance = 1e-10)
 
+  # Can ask for reasonable coverage of the entire curve.
   rand.prio <- sample(1:100, n, TRUE)
   rate <- rank_average_treatment_effect(cf, rand.prio, R = 250)
   TOC <- rate$TOC$estimate
