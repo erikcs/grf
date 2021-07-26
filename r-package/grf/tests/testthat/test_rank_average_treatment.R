@@ -13,7 +13,7 @@ test_that("rank_average_treatment_effect works as expected", {
   plot(rate)
 
   q.length <- nrow(rate$TOC)
-  expect_equal(rate$TOC[q.length, "estimate"], 0, tolerance = 1e-10) # Last TOC curve entry = zero.
+  expect_equal(rate$TOC[q.length, "estimate"], 0, tolerance = 1e-10) # Last TOC curve entry (q=1) = zero.
   expect_equal(rate$TOC[q.length, "std.err"], 0, tolerance = 1e-10) # Last TOC curve entry = zero.
   expect_true(all(rate$TOC$estimate[1:(q.length - 1)] >= 0)) # for this prio all points on curve are > 0
 
