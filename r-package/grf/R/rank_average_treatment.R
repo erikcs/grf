@@ -117,11 +117,12 @@ rank_average_treatment_effect <- function(forest,
     stop("`priorities` contains missing values.")
   }
   if (length(priorities) == NROW(forest$Y.orig)) {
-    # store as factor, more efficient `tabulate()` for large |S| with many ties.
-    priorities <- as.factor(priorities[subset])
+    priorities <- priorities[subset]
   } else if (length(priorities) != length(subset)) {
     stop("`priorities` must be a vector of length n or the subset length.")
   }
+  # store as factor, more efficient `tabulate()` for large |S| with many ties.
+  priorities <- as.factor(priorities)
   if (!all(forest$W.orig %in% c(0, 1))) {
     stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
   }
