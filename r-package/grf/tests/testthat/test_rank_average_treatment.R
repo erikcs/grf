@@ -46,6 +46,7 @@ test_that("TOC grid works as expected", {
   prio <- tau
 
   # Computing TOC on grid 1/n <= q < 1 agrees exactly with AUTOC.
+  # (Disable half-sample bootstrap (R=0) to be able to pass in such a granular grid)
   q.full <- seq(1/n, 1, by = 1/n)
   rate.full <-rank_average_treatment_effect(cf, prio, q = q.full, R = 0)
   autoc <- rate.full$estimate
