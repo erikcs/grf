@@ -138,7 +138,7 @@ rank_average_treatment_effect <- function(forest,
                 "(or some clusters contains too few units)."))
   }
 
-  # For all supported forest types, DR.scores is a n-length vector
+  # For all supported forest types, DR.scores is a subset-length vector
   # (future support for multi_arm_causal_forest may be hairy...)
   DR.scores <- get_scores(forest, subset = subset, debiasing.weights = debiasing.weights,
                           compliance.score = compliance.score, num.trees.for.weights = num.trees.for.weights)
