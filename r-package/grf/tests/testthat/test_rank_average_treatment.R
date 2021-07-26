@@ -5,7 +5,7 @@ test_that("rank_average_treatment_effect works as expected", {
   W <- rbinom(n, 1, 0.5)
   tau <- pmax(X[, 1], 0)
   Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
-  cf <- causal_forest(X, Y, W, num.trees = 250)
+  cf <- causal_forest(X, Y, W, W.hat = 0.5, num.trees = 250)
 
   prio <- get_scores(cf)
   rate <- rank_average_treatment_effect(cf, prio)
@@ -30,7 +30,7 @@ test_that("rank_average_treatment_effect works as expected", {
   qini.rand <- rank_average_treatment_effect(cf, rand.prio, method = "QINI", R = 150)
   expect_equal(qini.rand[["estimate"]], 0, tolerance = 3 * qini.rand[["std.err"]])
 
-  cf.survival <- causal_survival_forest(X, Y, W, rep(1, n), num.trees = 250)
+  cf.survival <- causal_survival_forest(X, Y, W, rep(1, n), W.hat = 0.5, num.trees = 250)
   autoc.cfs <- rank_average_treatment_effect(cf.survival, rand.prio, R = 150)
   expect_equal(autoc.cfs[["estimate"]], 0, tolerance = 3 * autoc.cfs[["std.err"]])
 })
@@ -42,7 +42,7 @@ test_that("TOC grid works as expected", {
   W <- rbinom(n, 1, 0.5)
   tau <- pmax(X[, 1], 0)
   Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
-  cf <- causal_forest(X, Y, W, num.trees = 250)
+  cf <- causal_forest(X, Y, W, W.hat = 0.5, num.trees = 250)
   prio <- tau
 
   # Computing TOC on grid 1/n <= q <= 1 agrees exactly with AUTOC.
@@ -73,7 +73,7 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   W <- rbinom(n, 1, 0.5)
   tau <- pmax(X[, 1], 0)
   Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
-  cf <- causal_forest(X, Y, W, num.trees = 250)
+  cf <- causal_forest(X, Y, W, W.hat = 0.5, num.trees = 250)
   DR.scores <- get_scores(cf)
 
   # 1. Unique priorities
@@ -128,8 +128,8 @@ test_that("cluster robust rank_average_treatment_effect is consistent", {
   Yc <- c(Y, Y, Y, Y, Y)
   clust <- rep(1:n, 5)
 
-  cf <- causal_forest(X, Y, W, num.trees = 250)
-  cf.clust <- causal_forest(Xc, Yc, Wc, clusters = clust, num.trees = 250)
+  cf <- causal_forest(X, Y, W, W.hat = 0.5, num.trees = 250)
+  cf.clust <- causal_forest(Xc, Yc, Wc, W.hat = 0.5, clusters = clust, num.trees = 250)
   prio <- runif(n)
   prio.clust <- rep(prio, 5)
 
