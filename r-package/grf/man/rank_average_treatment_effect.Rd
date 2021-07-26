@@ -63,7 +63,7 @@ A list of class `rank_average_treatment_effect` with elements \itemize{
 \description{
 Consider a rule S(Xi) assigning scores to units in decreasing order of treatment prioritization.
 In the case of a forest with binary treatment, we provide estimates of the following, where
-1/n < q <= 1 represents the fraction of treated units:
+1/n <= q <= 1 represents the fraction of treated units:
 \itemize{
   \item The Rank-Weighted Average Treatment Effect (RATE):
    \eqn{\int_{0}^{1} alpha(q) TOC(q; S) dq}, where alpha is a weighting method
