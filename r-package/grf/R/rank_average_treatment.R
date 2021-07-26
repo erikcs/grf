@@ -88,6 +88,9 @@ rank_average_treatment_effect <- function(forest,
                                           debiasing.weights = NULL,
                                           compliance.score = NULL,
                                           num.trees.for.weights = 500) {
+  if (!any(c("causal_forest", "instrumental_forest", "causal_survival_forest") %in% class(forest))) {
+    stop("`rank_average_treatment_effect` is not implemented for this forest type.")
+  }
   method <- match.arg(method)
   cluster.se <- length(forest$clusters) > 0
   clusters <- if (cluster.se) {
@@ -96,7 +99,6 @@ rank_average_treatment_effect <- function(forest,
     1:NROW(forest$Y.orig)
   }
   observation.weight <- observation_weights(forest)
-
   subset <- validate_subset(forest, subset)
   subset.clusters <- clusters[subset]
   subset.weights <- observation.weight[subset]
@@ -119,9 +121,6 @@ rank_average_treatment_effect <- function(forest,
     priorities <- as.factor(priorities[subset])
   } else if (length(priorities) != length(subset)) {
     stop("`priorities` must be a vector of length n or the subset length.")
-  }
-  if (!any(c("causal_forest", "instrumental_forest", "causal_survival_forest") %in% class(forest))) {
-    stop("`rank_average_treatment_effect` is not implemented for this forest type.")
   }
   if (!all(forest$W.orig %in% c(0, 1))) {
     stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
