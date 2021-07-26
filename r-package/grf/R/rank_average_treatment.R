@@ -129,7 +129,11 @@ rank_average_treatment_effect <- function(forest,
     stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
   }
   samples.by.cluster <- split(seq_along(subset.clusters), subset.clusters)
-  n.half <- floor(length(samples.by.cluster) / 2)
+  n.half <- if (R < 1) {
+    length(samples.by.cluster)
+  } else {
+    floor(length(samples.by.cluster) / 2)
+  }
   # lower bound on number of units in half-sample bootstrap. Equal to n.half when each unit its own cluster.
   smallest.bs.n <- sum(lengths(samples.by.cluster)[order(lengths(samples.by.cluster))][1:n.half])
   smallest.grid.bucket.size <- floor(smallest.bs.n * q)

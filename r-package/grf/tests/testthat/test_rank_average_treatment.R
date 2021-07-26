@@ -9,6 +9,9 @@ test_that("rank_average_treatment_effect works as expected", {
 
   prio <- get_scores(cf)
   rate <- rank_average_treatment_effect(cf, prio)
+  capture.output(print(rate))
+  plot(rate)
+
   q.length <- nrow(rate$TOC)
   expect_equal(rate$TOC[q.length, "estimate"], 0, tolerance = 1e-10) # Last TOC curve entry = zero.
   expect_equal(rate$TOC[q.length, "std.err"], 0, tolerance = 1e-10) # Last TOC curve entry = zero.
@@ -30,9 +33,35 @@ test_that("rank_average_treatment_effect works as expected", {
   cf.survival <- causal_survival_forest(X, Y, W, rep(1, n), num.trees = 250)
   autoc.cfs <- rank_average_treatment_effect(cf.survival, rand.prio, R = 150)
   expect_equal(autoc.cfs[["estimate"]], 0, tolerance = 3 * autoc.cfs[["std.err"]])
+})
 
-  capture.output(print(rate))
-  plot(rate)
+test_that("TOC grid works as expected", {
+  n <- 500
+  p <- 5
+  X <- matrix(rnorm(n * p), n, p)
+  W <- rbinom(n, 1, 0.5)
+  tau <- pmax(X[, 1], 0)
+  Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+  cf <- causal_forest(X, Y, W, num.trees = 250)
+  prio <- tau
+
+  # Computing TOC on grid 1/n <= q < 1 agrees exactly with AUTOC.
+  q.full <- seq(1/n, 1, by = 1/n)
+  rate.full <-rank_average_treatment_effect(cf, prio, q = q.full, R = 0)
+  autoc <- rate.full$estimate
+  expect_equal(mean(rate.full$TOC$estimate), autoc, tolerance = 1e-10)
+
+  rand.prio <- sample(1:100, n, TRUE)
+  rate <- rank_average_treatment_effect(cf, rand.prio, R = 250)
+  TOC <- rate$TOC$estimate
+  TOC.se <- rate$TOC$std.err
+  expect_equal(TOC, rep(0, length(TOC)), tolerance = 3 * TOC.se)
+
+  q5 <- seq(0.05, 1, by = 0.05)
+  rate.q5 <- rank_average_treatment_effect(cf, rand.prio, q = q5, R = 250)
+  TOC.q5 <- rate.q5$TOC$estimate
+  TOC.q5.se <- rate.q5$TOC$std.err
+  expect_equal(TOC.q5, rep(0, length(TOC.q5)), tolerance = 3 * TOC.q5.se)
 })
 
 test_that("rank_average_treatment_effect agrees with plain brute-force calculation", {
