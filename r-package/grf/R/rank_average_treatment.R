@@ -182,7 +182,7 @@ rank_average_treatment_effect <- function(forest,
     grid.id <- rep.int(nq, c(nq[1], diff(nq)))
 
     prio <- data[indices, 2]
-    group.length <- tabulate(prio, nlevels(prio))
+    group.length <- tabulate(prio)
     group.length <- group.length[group.length != 0] # ignore potential levels not present in BS sample
     grp.means <- rowsum(data[indices, 1], as.integer(prio)) / group.length
 
