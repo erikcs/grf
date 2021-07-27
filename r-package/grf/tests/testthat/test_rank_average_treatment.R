@@ -93,7 +93,7 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
   expect_equal(qini[["estimate"]], QINI, tolerance = 1e-10)
 
   # 2. Duplicate priorities
-  prio.dup <- sample(1:20, n, replace = TRUE)
+  prio.dup <- sample(c(13, 14, 15, 18, 21, 58), n, replace = TRUE)
   autoc.dup <- rank_average_treatment_effect(cf, prio.dup, R = 0)
   qini.dup <- rank_average_treatment_effect(cf, prio.dup, method = "QINI", R = 0)
 
