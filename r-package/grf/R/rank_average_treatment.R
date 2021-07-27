@@ -15,6 +15,7 @@
 #' The Rank-Weighted Average Treatment Effect (RATE) is a weighted sum of this curve,
 #' and is a measure designed to identify prioritization rules that effectively targets treatment.
 #'
+#'
 #' TODO This paragraph can contain details. Etc etc. Breifly say ties are fine. Briefly
 #' say when you want AUTOC and when you want QINI.
 #'
