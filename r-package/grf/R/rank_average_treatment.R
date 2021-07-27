@@ -159,7 +159,7 @@ rank_average_treatment_effect <- function(forest,
   }
 
   # Compute estimates, a function to be passed on to boostrap routine.
-  # @data: a data.frame with the original data. column 1: DR.scores, column 2: priority scores (factor)
+  # @data: a data.frame with the original data, column 1: DR.scores, column 2: priority scores (factor)
   # @indices: a vector of indices which define the bootstrap sample.
   # @returns: an estimate of RATE, together with the TOC curve.
   estimate <- function(data, indices) {
@@ -247,7 +247,7 @@ print.rank_average_treatment_effect <- function(x, ...) {
 
 #' Simple clustered bootstrap.
 #'
-#' Adopted from the `boot` function in the boostrap package with clusters added.
+#' Adopted from the `boot` function in the boostrap package with clusters + half-sampling added.
 #' A future TODO could be to add parallel (not necessarily worth it)
 #' https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
 #'

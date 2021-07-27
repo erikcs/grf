@@ -25,7 +25,7 @@ unclustered bootstrap.}
 A list with the original estimate t0, and bootstrap estimates t.
 }
 \description{
-Adopted from the `boot` function in the boostrap package with clusters added.
+Adopted from the `boot` function in the boostrap package with clusters + half-sampling added.
 A future TODO could be to add parallel (not necessarily worth it)
 https://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
 }
