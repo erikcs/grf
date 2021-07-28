@@ -127,7 +127,7 @@ rank_average_treatment_effect <- function(forest,
   if (!all(forest$W.orig %in% c(0, 1))) {
     stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
   }
-  if (is.unsorted(q, strictly = TRUE) || min(q) <= 0 || max(q) >= 1) {
+  if (is.unsorted(q, strictly = TRUE) || min(q) <= 0 || max(q) != 1) {
     stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
   }
   samples.by.cluster <- split(seq_along(subset.clusters), subset.clusters)
