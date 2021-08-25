@@ -216,24 +216,33 @@ rank_average_treatment_effect <- function(forest,
 
 #' Plot the Targeting Operator Characteristic curve.
 #' @param x The output of rank_average_treatment_effect.
-#' @param ... Additional arguments passed to plot.default.
+#' @param confidence.bars Whether to plot 95 \% confidence lines or not. Default is TRUE.
+#' @param ... Additional overridable arguments passed to plot.default.
 #'
 #' @method plot rank_average_treatment_effect
 #' @export
-plot.rank_average_treatment_effect <- function(x, ...) {
+plot.rank_average_treatment_effect <- function(x, confidence.bars = TRUE, ...) {
+  dots <- list(...)
   n <- NROW(x[["TOC"]])
   TOC <- x[["TOC"]]
   q <- TOC[, "q"]
   ub <- TOC[, "estimate"] + 1.96 * TOC[, "std.err"]
   lb <- TOC[, "estimate"] - 1.96 * TOC[, "std.err"]
-  plot(q, TOC[, "estimate"], type = "l", ylim = c(min(lb), max(ub)),
-       ylab = "",
-       main = "Targeting Operator Characteristic",
-       sub = "(95 % confidence bars in dashed lines)",
-       ...)
+  plot.defaults <- list(type = "l",
+                        ylim = c(min(lb), max(ub)),
+                        xlab = "q",
+                        ylab = "",
+                        main = "Targeting Operator Characteristic",
+                        sub = if (confidence.bars) "(95 % confidence bars in dashed lines)" else "")
+  override <- names(plot.defaults) %in% names(dots)
+  plot.args <- c(dots, plot.defaults[!override])
+
+  do.call(plot.default, c(list(x = q, y = TOC[, "estimate"]), plot.args))
   abline(h = 0, lty = 3)
-  lines(q, ub, col = "black", lty = 2)
-  lines(q, lb, col = "black", lty = 2)
+  if (confidence.bars) {
+    lines(q, ub, col = "black", lty = 2)
+    lines(q, lb, col = "black", lty = 2)
+  }
 }
 
 #' Print the Rank-Weighted Average Treatment Effect (RATE).

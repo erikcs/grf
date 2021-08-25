@@ -4,12 +4,14 @@
 \alias{plot.rank_average_treatment_effect}
 \title{Plot the Targeting Operator Characteristic curve.}
 \usage{
-\method{plot}{rank_average_treatment_effect}(x, ...)
+\method{plot}{rank_average_treatment_effect}(x, confidence.bars = TRUE, ...)
 }
 \arguments{
 \item{x}{The output of rank_average_treatment_effect.}
 
-\item{...}{Additional arguments passed to plot.default.}
+\item{confidence.bars}{Whether to plot 95 \% confidence lines or not. Default is TRUE.}
+
+\item{...}{Additional overridable arguments passed to plot.default.}
 }
 \description{
 Plot the Targeting Operator Characteristic curve.

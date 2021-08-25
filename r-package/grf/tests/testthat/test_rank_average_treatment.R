@@ -11,6 +11,8 @@ test_that("rank_average_treatment_effect works as expected", {
   rate <- rank_average_treatment_effect(cf, prio)
   capture.output(print(rate))
   plot(rate)
+  plot(rate, ylab = "42")
+  plot(rate, ylab = "42", col = "green", sub = "sub")
 
   q.length <- nrow(rate$TOC)
   expect_equal(rate$TOC[q.length, "estimate"], 0, tolerance = 1e-10) # Last TOC curve entry (q=1) = zero.
