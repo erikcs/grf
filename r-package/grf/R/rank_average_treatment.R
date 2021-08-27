@@ -216,32 +216,57 @@ rank_average_treatment_effect <- function(forest,
 
 #' Plot the Targeting Operator Characteristic curve.
 #' @param x The output of rank_average_treatment_effect.
-#' @param confidence.bars Whether to plot 95 \% confidence lines or not. Default is TRUE.
-#' @param ... Additional overridable arguments passed to plot.default.
+#' @param lb Lower confidence lines. Default is 95\%.
+#' @param ub Upper confidence lines. Default is 95\%.
+#' @param ylim The `ylim` argument to plot.default.
+#' @param xlab The `xlab` argument to plot.default.
+#' @param main The title argument `main` to plot.default.
+#' @param sub The `sub` title argument  to plot.default.
+#' @param ci.lines Whether to plot 95 \% confidence lines or not. Default is TRUE.
+#' @param ci.lty The line type `lty` for confidence lines.
+#' @param ci.col The line color for confidence lines.
+#' @param ... Additional arguments passed to plot.default.
+#'
+#' @examples
+#' \donttest{
+#' # Estimate RATE on a random priority.
+#' n <- 500
+#' p <- 5
+#' X <- matrix(rnorm(n * p), n, p)
+#' W <- rbinom(n, 1, 0.5)
+#' Y <- pmax(X[, 1], 0) * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+#' cf <- causal_forest(X, Y, W)
+#' rate <- rank_average_treatment_effect(cf, runif(n))
+#'
+#' # Plot the Targeting Operator Characteristic curve.
+#' plot(rate)
+#' # Customize some plot options.
+#' plot(r, col = "blue", ci.col = "red", ci.lty = 1, main = "TOC")
+#' # To customize plots further use the curve data.frame in the `TOC` attribute directly.
+#' }
 #'
 #' @method plot rank_average_treatment_effect
 #' @export
-plot.rank_average_treatment_effect <- function(x, confidence.bars = TRUE, ...) {
-  dots <- list(...)
-  n <- NROW(x[["TOC"]])
+plot.rank_average_treatment_effect <- function(x,
+                                               lb = x$TOC$estimate - 1.96 * x$TOC$std.err,
+                                               ub = x$TOC$estimate + 1.96 * x$TOC$std.err,
+                                               ylim = if (ci.lines) c(min(lb), max(ub)) else NULL,
+                                               xlab = "q",
+                                               ylab = "",
+                                               main = "Targeting Operator Characteristic",
+                                               sub = if (ci.lines) "(95 % confidence bars in dashed lines)" else NULL,
+                                               ci.lines = TRUE,
+                                               ci.lty = 2,
+                                               ci.col = "black",
+                                               ...) {
   TOC <- x[["TOC"]]
   q <- TOC[, "q"]
-  ub <- TOC[, "estimate"] + 1.96 * TOC[, "std.err"]
-  lb <- TOC[, "estimate"] - 1.96 * TOC[, "std.err"]
-  plot.defaults <- list(type = "l",
-                        ylim = c(min(lb), max(ub)),
-                        xlab = "q",
-                        ylab = "",
-                        main = "Targeting Operator Characteristic",
-                        sub = if (confidence.bars) "(95 % confidence bars in dashed lines)" else "")
-  override <- names(plot.defaults) %in% names(dots)
-  plot.args <- c(dots, plot.defaults[!override])
-
-  do.call(plot.default, c(list(x = q, y = TOC[, "estimate"]), plot.args))
+  plot(q, TOC[["estimate"]], type = "l", ylim = ylim, xlab = xlab, ylab = ylab,
+       main = main, sub = sub, ...)
   abline(h = 0, lty = 3)
-  if (confidence.bars) {
-    lines(q, ub, col = "black", lty = 2)
-    lines(q, lb, col = "black", lty = 2)
+  if (ci.lines) {
+    lines(q, ub, col = ci.col, lty = ci.lty)
+    lines(q, lb, col = ci.col, lty = ci.lty)
   }
 }
 
