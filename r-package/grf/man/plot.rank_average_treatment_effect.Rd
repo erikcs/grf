@@ -47,19 +47,23 @@ Plot the Targeting Operator Characteristic curve.
 }
 \examples{
 \donttest{
-# Estimate RATE on a random priority.
 n <- 500
 p <- 5
 X <- matrix(rnorm(n * p), n, p)
 W <- rbinom(n, 1, 0.5)
 Y <- pmax(X[, 1], 0) * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
 cf <- causal_forest(X, Y, W)
-rate <- rank_average_treatment_effect(cf, runif(n))
+rate1 <- rank_average_treatment_effect(cf, runif(n))
+rate2 <- rank_average_treatment_effect(cf, pmax(X[, 1], 0))
 
-# Plot the Targeting Operator Characteristic curve.
-plot(rate)
 # Customize some plot options.
-plot(r, col = "blue", ci.col = "red", ci.lty = 1, main = "TOC")
+plot(rate1, col = "blue", ci.col = "red", ci.lty = 1, main = "TOC")
+
+# Plot two TOC curves.
+par(mfrow = c(2, 1))
+plot(rate1, sub = "", main = "Rule 1")
+plot(rate2, sub = "", main = "Rule 2")
+
 # To customize plots further use the curve data.frame in the `TOC` attribute directly.
 }
 
