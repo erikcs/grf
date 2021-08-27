@@ -38,6 +38,7 @@
 #'
 #' @param X The covariates used in the causal regression.
 #' @param Y The outcome (must be a numeric vector or matrix [one column per outcome] with no NAs).
+#'  Multiple outcomes should be on the same scale.
 #' @param W The treatment assignment (must be a factor vector with no NAs). The reference treatment
 #'          is set to the first treatment according to the ordinality of the factors, this can be changed
 #'          with the `relevel` function in R.
@@ -201,6 +202,9 @@ multi_arm_causal_forest <- function(X, Y, W,
   }
   if (nlevels(W) == 1) {
     stop("Can not compute contrasts from a single treatment.")
+  }
+  if (nlevels(W) != nlevels(droplevels(W))) {
+    warning("The treatment vector W contains unused levels (see `droplevels()` to drop unused levels).")
   }
 
   args.orthog <- list(X = X,
@@ -401,7 +405,7 @@ predict.multi_arm_causal_forest <- function(object,
                num.threads = num.threads,
                estimate.variance = estimate.variance)
 
-   if (!is.null(newdata)) {
+  if (!is.null(newdata)) {
     validate_newdata(newdata, X, allow.na = TRUE)
     test.data <- create_test_matrices(newdata)
     ret <- do.call.rcpp(multi_causal_predict, c(train.data, test.data, args))
