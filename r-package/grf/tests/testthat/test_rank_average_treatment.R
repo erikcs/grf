@@ -89,7 +89,7 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
     TOC[i] <- mean(DR.scores[sort.idx[1:i]]) - mean(DR.scores)
   }
   AUTOC <- mean(TOC)
-  QINI <- weighted.mean(TOC, 1:n)
+  QINI <- sum(seq.int(1, length(TOC)) / length(TOC)^2 * TOC)
 
   expect_equal(autoc[["estimate"]], AUTOC, tolerance = 1e-10)
   expect_equal(qini[["estimate"]], QINI, tolerance = 1e-10)
@@ -111,7 +111,7 @@ test_that("rank_average_treatment_effect agrees with plain brute-force calculati
     TOC.dup[i] <- mean(scores.order[1:i]) - mean(DR.scores)
   }
   AUTOC.dup <- mean(TOC.dup)
-  QINI.dup <- weighted.mean(TOC.dup, 1:n)
+  QINI.dup <- sum(seq.int(1, length(TOC.dup)) / length(TOC.dup)^2 * TOC.dup)
 
   expect_equal(autoc.dup[["estimate"]], AUTOC.dup, tolerance = 1e-10)
   expect_equal(qini.dup[["estimate"]], QINI.dup, tolerance = 1e-10)

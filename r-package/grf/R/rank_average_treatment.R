@@ -159,7 +159,7 @@ rank_average_treatment_effect <- function(forest,
   if (method == "AUTOC") {
     wtd.mean <- function(x) mean(x)
   } else if (method == "QINI") {
-    wtd.mean <- function(x) weighted.mean(x, seq.int(1, length(x)))
+    wtd.mean <- function(x) sum(seq.int(1, length(x)) / length(x)^2 * x)
   }
 
   # Compute estimates, a function to be passed on to boostrap routine.
