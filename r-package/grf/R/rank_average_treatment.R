@@ -109,7 +109,6 @@ rank_average_treatment_effect <- function(forest,
   if (any(forest$W.hat[subset] == 0)) {
     stop("Cannot compute a doubly robust estimate when some propensities are exactly zero.")
   }
-
   if (length(unique(subset.clusters)) <= 1) {
     stop("The specified subset must contain units from more than one cluster.")
   }
