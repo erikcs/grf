@@ -29,7 +29,7 @@ survival_forest(
 \arguments{
 \item{X}{The covariates.}
 
-\item{Y}{The event time (may be negative).}
+\item{Y}{The event time (must be non-negative).}
 
 \item{D}{The event type (0: censored, 1: failure).}
 
@@ -99,7 +99,7 @@ A trained survival_forest forest object.
 }
 \description{
 Trains a forest for right-censored surival data that can be used to estimate the
-conditional survival function S(t, x) = P[Y > t | X = x]
+conditional survival function S(t, x) = P[T > t | X = x]
 }
 \examples{
 \donttest{
