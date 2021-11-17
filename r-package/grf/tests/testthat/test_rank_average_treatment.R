@@ -4,7 +4,7 @@ test_that("rank_average_treatment_effect works as expected", {
   X <- matrix(rnorm(n * p), n, p)
   W <- rbinom(n, 1, 0.5)
   tau <- pmax(X[, 1], 0)
-  Y <- tau * W + X[, 2] + pmin(X[, 3], 0) + rnorm(n)
+  Y <- tau * W + pmax(X[, 3], 0) + runif(n)
   cf <- causal_forest(X, Y, W, W.hat = 0.5, num.trees = 250)
 
   prio <- get_scores(cf)
