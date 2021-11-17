@@ -92,6 +92,9 @@ rank_average_treatment_effect <- function(forest,
   if (!any(c("causal_forest", "instrumental_forest", "causal_survival_forest") %in% class(forest))) {
     stop("`rank_average_treatment_effect` is not implemented for this forest type.")
   }
+  if (!all(forest$W.orig %in% c(0, 1))) {
+    stop("`rank_average_treatment_effect` only supports binary treatment.")
+  }
   method <- match.arg(method)
   cluster.se <- length(forest$clusters) > 0
   clusters <- if (cluster.se) {
@@ -103,6 +106,9 @@ rank_average_treatment_effect <- function(forest,
   subset <- validate_subset(forest, subset)
   subset.clusters <- clusters[subset]
   subset.weights <- observation.weight[subset]
+  if (any(forest$W.hat[subset] == 0)) {
+    stop("Cannot compute a doubly robust estimate when some propensities are exactly zero.")
+  }
 
   if (length(unique(subset.clusters)) <= 1) {
     stop("The specified subset must contain units from more than one cluster.")
@@ -124,9 +130,6 @@ rank_average_treatment_effect <- function(forest,
   }
   # store as factor, more efficient `tabulate()` for large |S| with many ties.
   priorities <- as.factor(priorities)
-  if (!all(forest$W.orig %in% c(0, 1))) {
-    stop("Rank-weighted average treatment effect estimation only implemented for binary treatment.")
-  }
   if (is.unsorted(q, strictly = TRUE) || min(q) <= 0 || max(q) != 1) {
     stop("`q` should correspond to a grid of fractions on the interval (0, 1].")
   }
