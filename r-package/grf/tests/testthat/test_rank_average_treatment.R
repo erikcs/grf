@@ -32,7 +32,7 @@ test_that("rank_average_treatment_effect works as expected", {
   qini.rand <- rank_average_treatment_effect(cf, rand.prio, method = "QINI", R = 150)
   expect_equal(qini.rand[["estimate"]], 0, tolerance = 3 * qini.rand[["std.err"]])
 
-  cf.survival <- causal_survival_forest(X, Y, W, rep(1, n), W.hat = 0.5, num.trees = 250)
+  cf.survival <- causal_survival_forest(X, Y, W, rep(1, n), W.hat = 0.5, num.trees = 250, horizon = max(Y))
   autoc.cfs <- rank_average_treatment_effect(cf.survival, rand.prio, R = 150)
   expect_equal(autoc.cfs[["estimate"]], 0, tolerance = 3 * autoc.cfs[["std.err"]])
 })
