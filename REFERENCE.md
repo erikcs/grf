@@ -2,7 +2,7 @@
 
 <img src='https://raw.githubusercontent.com/grf-labs/grf/master/images/logo/grf_logo_wbg_cropped.png' align="right" height="120" />
 
-The following guide gives an introduction to the generalized random forests algorithm as implemented in the `grf` package. It aims to give a complete description of the training and prediction procedures, as well as the options available for tuning. This guide is intended as an informal and practical reference; for a theoretical treatment of GRF, please consult the 'Generalized Random Forests' paper.
+The following guide gives an introduction to the generalized random forests algorithm as implemented in the `grf` package. It aims to give a complete description of the training and prediction procedures, as well as the options available for tuning. This guide is intended as an informal and practical reference; for a theoretical treatment of GRF, please consult the 'Generalized Random Forests' [paper](https://arxiv.org/abs/1610.01271).
 
 GRF extends the idea of a classic random forest to allow for estimating other statistical quantities besides the expected outcome. Each forest type, for example `quantile_forest`, trains a random forest targeted at a particular problem, like quantile estimation. The most common use of GRF is in estimating treatment effects through the function `causal_forest`.
 
@@ -17,9 +17,11 @@ GRF extends the idea of a classic random forest to allow for estimating other st
   * [Orthogonalization](#orthogonalization)
   * [Selecting Balanced Splits](#selecting-balanced-splits)
   * [Average Treatment Effects](#average-treatment-effects)
-  * [Best Linear Projection of the CATE](#best-linear-projection-of-the-CATE)
+  * [Best Linear Projection of the CATE](#best-linear-projection-of-the-cate)
+  * [Multiple Outcomes and Multiple Treatments](#multiple-outcomes-and-multiple-treatments)
 * [Additional Features](#additional-features)
   * [Parameter Tuning](#parameter-tuning)
+  * [Merging Forests](#merging-forests)
   * [Boosted Regression Forests](#boosted-regression-forests)
   * [Cluster-Robust Estimation](#cluster-robust-estimation)
   * [Sample Weighting](#sample-weighting)
@@ -172,7 +174,7 @@ Beyond this core training procedure, causal forests incorporate some additions s
 
 ### Orthogonalization
 
-Recall that causal forests assume that potential outcomes are independent of treatment assignment, but only after we condition on features `X`. In this setting, in order to consistently estimate conditional average treatment effects, a naive causal forest would need to split both on features that affect treatment effects and those that affect treatment propensities. This can be wasteful, as splits 'spent' on modelling treatment propensities may not be useful in estimating treatment heterogeneity.
+Recall that causal forests assume that potential outcomes are independent of treatment assignment, but only after we condition on features `X`. In this setting, in order to consistently estimate conditional average treatment effects, a naive causal forest would need to split both on features that affect treatment effects and those that affect treatment propensities. This can be wasteful, as splits 'spent' on modeling treatment propensities may not be useful in estimating treatment heterogeneity.
 
 In GRF, we avoid this difficulty by 'orthogonalizing' our forest using Robinson's transformation (Robinson, 1988). Before running `causal_forest`, we compute estimates of the propensity scores `e(x) = E[W|X=x]` and marginal outcomes `m(x) = E[Y|X=x]` by training separate regression forests and performing out-of-bag prediction. We then compute the residual treatment `W - e(x)` and outcome `Y - m(x)`, and finally train a causal forest on these residuals. If propensity scores or marginal outcomes are known through prior means (as might be the case in a randomized trial) they can be specified through the training parameters `W.hat` and `Y.hat`. In this case, `causal_forest` will use these estimates instead of training separate regression forests.
 
@@ -212,6 +214,16 @@ Qualitatively, these betas can be used to assess the association of the CATE fun
 
 The function `best_linear_projection` provides estimates of the coefficients beta in the above model. Note that this function does not simply regress the CATE estimates tau.hat(Xi) given by the causal forest against Ai. Instead, we use a doubly robust estimator that generalizes the augmented inverse-propensity weighted estimator for the average treatment effect described above.
 
+### Multiple Outcomes and Multiple Treatments
+
+As mentioned above, causal forest choose splits that maximize the difference in the treatment effect tau between two child nodes by a gradient based approximation. When the response `Yi` and treatment `Wi` are real-valued this results in a scalar valued approximation &rho;i which is used by the subsequent splitting routine (see section 2.3 of the GRF paper for more details).
+
+There are however empirical applications where there are more than one primary outcome `Y` of interest, and a practitioner may wish to train a forest that jointly expresses heterogeneity in treatment effects across several outcomes `Yj`, j=1...M. The same algorithmic framework described above can be employed for this purpose (assuming all outcomes are on the same scale) by computing the gradient based approximation of tau_j across each outcome, then concatenating them to a M-sized pseudo response vector &rho; which is used by a subsequent CART regression splitting routine. The CART criterion GRF uses for vector-valued responses is the squared L2 norm.
+
+Another closely related practical application are settings where there are several interventions, as for example in medical trials with multiple treatment arms. In the event there are K mutually exclusive treatment choices, we can use the same algorithmic principles described above to build a forest that jointly targets heterogeneity across the K-1 different treatment contrasts. In the software package this is done with (20) from the GRF paper, where Wi is a vector encoded as {0, 1}^(K-1), and &xi; selects the K-1 gradient approximations of the contrasts.
+
+The functionality described above is available in `multi_arm_causal_forest`.
+
 ## Additional Features
 
 The following sections describe other features of GRF that may be of interest.
@@ -229,7 +241,7 @@ GRF provides a cross-validation procedure to select values of these parameters t
 
 The cross-validation procedure works as follows:
 - Draw a number of random points in the space of possible parameter values. By default, 100 distinct sets of parameter values are chosen (`tune.num.reps`).
-- For each set of parameter values, train a forest with these values and compute the out-of-bag error. There are a couple important points to note about this error measure, outlined below. The exact procedure for computing the error can be found in the C++ methods that implement`OptimizedPredictionStrategy#compute_debiased_error`.
+- For each set of parameter values, train a forest with these values and compute the out-of-bag error. There are a couple important points to note about this error measure, outlined below. The exact procedure for computing the error can be found in the C++ methods that implement `OptimizedPredictionStrategy#compute_debiased_error`.
   - For tuning to be computationally tractable, we only train 'mini forests' composed of a small number of trees (`tune.num.trees`). With such a small number of trees, the out-of-bag error gives a biased estimate of the final forest error. We therefore debias the error through a simple variance decomposition.
   - While the notion of error is straightforward for regression forests, it can be more subtle in the context of treatment effect estimation. For causal forests, we use a measure of error developed in Nie and Wager (2021) motivated by residual-on-residual regression (Robinson, 1988).
 - Finally, given the debiased error estimates for each set of parameters, we apply a smoothing function to determine the optimal parameter values. The optimal parameters are the ones minimizing the predicted smoothed error on a new random draw of possible parameter values (of size `tune.num.draws`).
