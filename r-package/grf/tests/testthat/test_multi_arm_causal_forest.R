@@ -359,3 +359,48 @@ test_that("multi_arm_causal_forest with multiple outcomes is well calibrated", {
 
   expect_lt(mse.mcf / mse.cf,  0.85)
 })
+
+
+test_that("grf style intercept split on mu, tau is implemented correctly", {
+  replicate(50, {
+  n <- 500
+  p <- 5
+  x <- matrix(rnorm(n * p), n, p)
+  w <- rbinom(n, 1, 0.5)
+  tau <- pmax(x[, 1], 0)
+  y <- tau * w + x[, 2] + pmin(x[, 3], 0) + rnorm(n)
+
+  Y.hat = regression_forest(x, y, num.trees = 500)$predictions[,]
+  W.hat = 0.5
+
+  W = cbind(1, w - W.hat)
+  Y = y - Y.hat
+  beta = solve(t(W) %*% W) %*% t(W) %*% Y
+  resid = Y - W %*% beta
+  psi = W * c(resid)
+  Ap = t(W) %*% W
+  rho = psi %*% solve(Ap)
+
+  cf = multi_arm_causal_forest(x, y, as.factor(w),
+                               Y.hat = Y.hat, W.hat = c(0.5, 0.5),
+                               stabilize.splits = FALSE,
+                               honesty = FALSE,
+                               sample.fraction = 1,
+                               ci.group.size = 1,
+                               num.trees = 1,
+                               min.node.size = n - 1,
+                               alpha = 0,
+                               mtry = 5,
+                               seed = 1)
+  rf = multi_regression_forest(x, rho,
+                               honesty = FALSE,
+                               sample.fraction = 1,
+                               num.trees = 1,
+                               min.node.size = n - 1,
+                               alpha = 0,
+                               mtry = 5,
+                               seed = 1)
+
+  expect_equal(cf$`_split_values`[[1]][1], rf$`_split_values`[[1]][1])
+  })
+})

@@ -56,7 +56,7 @@ ForestTrainer instrumental_trainer(double reduced_form_weight,
 ForestTrainer multi_causal_trainer(size_t num_treatments,
                                    size_t num_outcomes,
                                    bool stabilize_splits) {
-  size_t response_length = num_treatments * num_outcomes;
+  size_t response_length = num_treatments * num_outcomes + 1;
   std::unique_ptr<RelabelingStrategy> relabeling_strategy(new MultiCausalRelabelingStrategy(response_length));
   std::unique_ptr<SplittingRuleFactory> splitting_rule_factory = stabilize_splits
     ? std::unique_ptr<SplittingRuleFactory>(new MultiCausalSplittingRuleFactory(response_length, num_treatments))

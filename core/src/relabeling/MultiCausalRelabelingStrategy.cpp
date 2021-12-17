@@ -27,10 +27,9 @@ bool MultiCausalRelabelingStrategy::relabel(
     const std::vector<size_t>& samples,
     const Data& data,
     Eigen::ArrayXXd& responses_by_sample) const {
-
   // Prepare the relevant averages.
   size_t num_samples = samples.size();
-  size_t num_treatments = data.get_num_treatments();
+  size_t num_treatments = data.get_num_treatments()+1;
   size_t num_outcomes = data.get_num_outcomes();
   if (num_samples <= num_treatments) {
     return true;
@@ -39,25 +38,28 @@ bool MultiCausalRelabelingStrategy::relabel(
   Eigen::MatrixXd Y_centered = Eigen::MatrixXd(num_samples, num_outcomes);
   Eigen::MatrixXd W_centered = Eigen::MatrixXd(num_samples, num_treatments);
   Eigen::VectorXd weights = Eigen::VectorXd(num_samples);
-  Eigen::VectorXd Y_mean = Eigen::VectorXd::Zero(num_outcomes);
-  Eigen::VectorXd W_mean = Eigen::VectorXd::Zero(num_treatments);
+  // Eigen::VectorXd Y_mean = Eigen::VectorXd::Zero(num_outcomes);
+  // Eigen::VectorXd W_mean = Eigen::VectorXd::Zero(num_treatments);
   double sum_weight = 0;
   for (size_t i = 0; i < num_samples; i++) {
     size_t sample = samples[i];
     double weight = data.get_weight(sample);
     Eigen::VectorXd outcome = data.get_outcomes(sample);
     Eigen::VectorXd treatment = data.get_treatments(sample);
+    Eigen::VectorXd one = Eigen::VectorXd::Ones(1);
+    Eigen::VectorXd one_treatment(one.size()+treatment.size());
+    one_treatment << one, treatment;
     Y_centered.row(i) = outcome;
-    W_centered.row(i) = treatment;
+    W_centered.row(i) = one_treatment;
     weights(i) = weight;
-    Y_mean += weight * outcome;
-    W_mean += weight * treatment;
+    // Y_mean += weight * outcome;
+    // W_mean += weight * treatment;
     sum_weight += weight;
   }
-  Y_mean /= sum_weight;
-  W_mean /= sum_weight;
-  Y_centered.rowwise() -= Y_mean.transpose();
-  W_centered.rowwise() -= W_mean.transpose();
+  // Y_mean /= sum_weight;
+  // W_mean /= sum_weight;
+  // Y_centered.rowwise() -= Y_mean.transpose();
+  // W_centered.rowwise() -= W_mean.transpose();
 
   if (std::abs(sum_weight) <= 1e-16) {
     return true;
@@ -88,6 +90,7 @@ bool MultiCausalRelabelingStrategy::relabel(
       }
     }
   }
+  // std::cout <<responses_by_sample <<"\n\nDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDd\n";
   return false;
 }
 
