@@ -75,8 +75,18 @@ bool MultiCausalRelabelingStrategy::relabel(
   Eigen::MatrixXd A_p_inv = WW_bar.inverse();
   Eigen::MatrixXd beta = A_p_inv * W_centered.transpose() * weights.asDiagonal() * Y_centered; // [num_treatments X num_outcomes]
 
-  Eigen::MatrixXd rho_weight = W_centered * A_p_inv.transpose(); // [num_samples X num_treatments]
+  // Eigen::MatrixXd rho_weight = W_centered * A_p_inv.transpose(); // [num_samples X num_treatments]
   Eigen::MatrixXd residual = Y_centered - W_centered * beta; // [num_samples X num_outcomes]
+
+  Eigen::MatrixXd psi = W_centered;
+  for (size_t i=0; i< num_samples; i++) {
+    psi.row(i) = W_centered.row(i)*residual(i, 0);
+  }
+  // Eigen::MatrixXd A = (psi.transpose()*psi/num_samples).inverse();
+  Eigen::MatrixXd A = (psi.transpose()*psi).completeOrthogonalDecomposition().pseudoInverse();
+
+  Eigen::MatrixXd rho_weight = W_centered * A.transpose(); // [num_samples X num_treatments]
+
 
   // Create the new outcomes, eq (20) in https://arxiv.org/pdf/1610.01271.pdf
   // `responses_by_sample(sample_i, )` is a `num_treatments*num_outcomes`-sized vector.
