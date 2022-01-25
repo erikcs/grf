@@ -100,7 +100,7 @@ for (i in 1:nrow(grid)) {
 
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
-    data = generate_survival_data(n, dgp = dgp, n.mc = 10)
+    data = generate_survival_data(n, dgp = dgp, n.mc = 1)
     data$Y = round(data$Y, 2)
     est = estimators[[estimator]](data, data.test)
 
