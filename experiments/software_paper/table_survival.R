@@ -23,7 +23,7 @@ tab.agg$time = paste0(format(round(tab.agg$time, 1), nsmall=1), " (", format(rou
 tab.agg$err = paste0(format(round(tab.agg$err, 1), nsmall=1), " (", format(round(tab.agg.se$err.se, 2), nsmall=2), ")")
 
 print(tab.agg, digits = 2)
-apply(df[c("n", "p", "n.test", "dgp", "estimator")], 2, unique)
+apply(df[c("n", "n.test", "dgp", "estimator")], 2, unique)
 
 tab.out = rbind(
   cbind(tab.agg[c("dgp", "estimator")], metric = "RMST MSE", value = tab.agg[["mse"]]),
