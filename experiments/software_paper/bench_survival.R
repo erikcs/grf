@@ -31,10 +31,11 @@ estimate_grf = function(data, data.test) {
 
   elapsed.sec = difftime(end, start, units = "secs")
   ehat = expected_survival(pp$predictions, pp$failure.times)
+  mse = mean((ehat - data.test$ET)^2)
   df.conc = data.frame(Y = data.test$Y, D = data.test$D, M = rowSums(-log(pp.na$predictions)))
   err = 1 - concordance(Surv(Y, D) ~ M, data = df.conc, reverse = TRUE)$concordance
 
-  list(ehat = ehat, elapsed.sec = elapsed.sec, err = err)
+  list(ehat = ehat, elapsed.sec = elapsed.sec, mse = mse, err = err)
 }
 
 estimate_SRC = function(data, data.test) {
@@ -48,10 +49,11 @@ estimate_SRC = function(data, data.test) {
 
   elapsed.sec = difftime(end, start, units = "secs")
   ehat = expected_survival(pp$survival, pp$time.interest)
+  mse = mean((ehat - data.test$ET)^2)
   df.conc = data.frame(Y = data.test$Y, D = data.test$D, M = pp$predicted)
   err = 1 - concordance(Surv(Y, D) ~ M, data = df.conc, reverse = TRUE)$concordance
 
-  list(ehat = ehat, elapsed.sec = elapsed.sec, err = err)
+  list(ehat = ehat, elapsed.sec = elapsed.sec, mse = mse, err = err)
 }
 
 estimate_ranger = function(data, data.test) {
@@ -65,10 +67,11 @@ estimate_ranger = function(data, data.test) {
 
   elapsed.sec = difftime(end, start, units = "secs")
   ehat = expected_survival(pp$survival, timepoints(fit))
+  mse = mean((ehat - data.test$ET)^2)
   df.conc = data.frame(Y = data.test$Y, D = data.test$D, M = rowSums(pp$chf))
   err = 1 - concordance(Surv(Y, D) ~ M, data = df.conc, reverse = TRUE)$concordance
 
-  list(ehat = ehat, elapsed.sec = elapsed.sec, err = err)
+  list(ehat = ehat, elapsed.sec = elapsed.sec, mse = mse, err = err)
 }
 
 estimators = list(grf = estimate_grf,
@@ -101,7 +104,7 @@ for (i in 1:nrow(grid)) {
     data$Y = round(data$Y, 2)
     est = estimators[[estimator]](data, data.test)
 
-    df = data.frame(mse = mean((est$ehat - data.test$ET)^2),
+    df = data.frame(mse = est$mse,
                     err = est$err,
                     elapsed.sec = as.numeric(est$elapsed.sec),
                     n = n,
