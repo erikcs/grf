@@ -77,9 +77,8 @@ estimators = list(grf = estimate_grf,
 # *** bench ***
 grid = expand.grid(
   n = c(2000),
-  p = c(5),
   n.test = c(2000),
-  dgp = c("type1", "type2", "type3", "type4"),
+  dgp = c("ZK1", "ZK2", "ZK3", "ZK4"),
   estimator = names(estimators),
   stringsAsFactors = FALSE
 )
@@ -91,22 +90,21 @@ print(Sys.time())
 for (i in 1:nrow(grid)) {
   print(paste("grid:", i))
   n = grid$n[i]
-  p = grid$p[i]
   n.test = grid$n.test[i]
   dgp = grid$dgp[i]
   estimator = grid$estimator[i]
 
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
-    data = generate_survival_data(n, p, dgp = dgp, n.mc = 10)
-    data.test = generate_survival_data(n.test, p, dgp = dgp, n.mc = 1e5)
+    data = generate_survival_data(n, dgp = dgp, n.mc = 10)
+    data$Y = round(data$Y, 2)
+    data.test = generate_survival_data(n.test, dgp = dgp, n.mc = 1e5)
     est = estimators[[estimator]](data, data.test)
 
     df = data.frame(mse = mean((est$ehat - data.test$ET)^2),
                     err = est$err,
                     elapsed.sec = as.numeric(est$elapsed.sec),
                     n = n,
-                    p = p,
                     n.test = n.test,
                     dgp = dgp,
                     estimator = estimator,
