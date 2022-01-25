@@ -8,14 +8,12 @@ df$estimator = factor(df$estimator, levels = c("SRC", "ranger", "grf"))
 
 tab.agg = aggregate(list(mse = 100*df$mse, time = df$elapsed.sec, err = 100*df$err),
                     by = list(n = df$n,
-                              p = df$p,
                               n.test = df$n.test,
                               dgp = df$dgp,
                               estimator = df$estimator),
                     FUN = mean)
 tab.agg.se = aggregate(list(mse.se = 100*df$mse, time.se = df$elapsed.sec, err.se = 100*df$err),
                               by = list(n = df$n,
-                                        p = df$p,
                                         n.test = df$n.test,
                                         dgp = df$dgp,
                                         estimator = df$estimator),
