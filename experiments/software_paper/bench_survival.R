@@ -93,12 +93,12 @@ for (i in 1:nrow(grid)) {
   n.test = grid$n.test[i]
   dgp = grid$dgp[i]
   estimator = grid$estimator[i]
+  data.test = generate_survival_data(n.test, dgp = dgp, n.mc = 1e5)
 
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
     data = generate_survival_data(n, dgp = dgp, n.mc = 10)
     data$Y = round(data$Y, 2)
-    data.test = generate_survival_data(n.test, dgp = dgp, n.mc = 1e5)
     est = estimators[[estimator]](data, data.test)
 
     df = data.frame(mse = mean((est$ehat - data.test$ET)^2),
