@@ -45,7 +45,7 @@ generate_survival_data <- function(n, Y.max = NULL, n.mc = 10000,
     D <- as.integer(failure.time <= censor.time)
     ET <- rep(NA, n)
     for (i in 1:n) {
-      ft <- rpois(n.mc, muT[i])
+      ft <- rexp(n.mc, muT[i])
       ET[i] <- mean(pmin(ft, Y.max))
     }
   } else if (dgp == "ZK2") {
@@ -62,7 +62,7 @@ generate_survival_data <- function(n, Y.max = NULL, n.mc = 10000,
     D <- as.integer(failure.time <= censor.time)
     ET <- rep(NA, n)
     for (i in 1:n) {
-      ft <- rpois(n.mc, muT[i])
+      ft <- rexp(n.mc, muT[i])
       ET[i] <- mean(pmin(ft, Y.max))
     }
   } else if (dgp == "ZK3") {
