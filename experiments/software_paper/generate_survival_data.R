@@ -54,7 +54,7 @@ generate_survival_data <- function(n, Y.max = NULL, n.mc = 10000,
       Y.max <- 6
     }
     X <- matrix(runif(n * p), n, p)
-    muT <- sin(0.5 * X[, 1]) + 2*abs(X[, 2] - 0.5) + X[, 3]^3
+    muT <- sin(pi * X[, 1]) + 2 * abs(X[, 2] - 0.5) + X[, 3]^3
     ft <- rexp(n, muT)
     failure.time <- pmin(ft, Y.max)
     censor.time <- runif(n, 0, Y.max)
