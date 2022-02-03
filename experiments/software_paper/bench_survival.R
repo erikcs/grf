@@ -79,8 +79,8 @@ estimators = list(grf = estimate_grf,
                   ranger = estimate_ranger)
 # *** bench ***
 grid = expand.grid(
-  n = c(5000),
-  n.test = c(5000),
+  n = c(2000),
+  n.test = c(2000),
   dgp = c("ZK1", "ZK2", "ZK3", "ZK4"),
   estimator = names(estimators),
   stringsAsFactors = FALSE
