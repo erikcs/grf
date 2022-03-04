@@ -13,15 +13,6 @@
 #'  `X`: the covariates, `Y`: the event times, `D`: the censoring indicator,
 #'  `ET`: the expected survival time E[T | X] estimated by monte carlo,
 #'  `dgp`: the dgp name, `Y.max`: the maximum follow-up time.
-#'
-#' @examples
-#' \donttest{
-#' # Generate data
-#' n <- 1000
-#' data <- generate_survival_data(n, dgp = "ZK1")
-#' }
-#'
-#' @export
 generate_survival_data <- function(n, Y.max = NULL, n.mc = 10000,
                                    dgp = c("ZK1", "ZK2", "ZK3", "ZK4")) {
   dgp <- match.arg(dgp)
