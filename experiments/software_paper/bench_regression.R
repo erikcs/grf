@@ -58,7 +58,7 @@ grid = expand.grid(
   n = c(10000),
   p = c(30),
   n.test = c(2000),
-  dgp = c("kunzel", "ai1", "ai2"),
+  dgp = c("kunzel", "ai1", "ai2", "NSLM", "AngristEvans"),
   stringsAsFactors = FALSE
 )
 print(grid)
@@ -73,10 +73,10 @@ for (i in 1:nrow(grid)) {
   n.test = grid$n.test[i]
   dgp = grid$dgp[i]
 
-  data.test = generate_regression_data(n.test, p, dgp = dgp)
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
     data = generate_regression_data(n, p, dgp = dgp)
+    data.test = generate_regression_data(n.test, p, dgp = dgp, ntrain = data$ntrain)
     for (estimator in names(estimators)) {
       est = estimators[[estimator]](data, data.test)
       df = data.frame(mse = mean((est$y.hat - data.test$Y)^2),
