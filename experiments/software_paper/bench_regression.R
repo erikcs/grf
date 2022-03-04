@@ -6,6 +6,7 @@ set.seed(42)
 library(randomForestSRC) # 2.9.3
 library(ranger) # 0.12.1
 library(grf) # 2.2.0
+source("generate_regression_data.R")
 
 # *** Estimators ***
 estimate_grf = function(data, data.test, honesty = TRUE, tune = FALSE) {
@@ -72,10 +73,10 @@ for (i in 1:nrow(grid)) {
   n.test = grid$n.test[i]
   dgp = grid$dgp[i]
 
-  data.test = generate_causal_data(n.test, p, dgp = dgp)
+  data.test = generate_regression_data(n.test, p, dgp = dgp)
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
-    data = generate_causal_data(n, p, dgp = dgp)
+    data = generate_regression_data(n, p, dgp = dgp)
     for (estimator in names(estimators)) {
       est = estimators[[estimator]](data, data.test)
       df = data.frame(mse = mean((est$y.hat - data.test$Y)^2),
