@@ -5,7 +5,7 @@ rm(list = ls())
 set.seed(42)
 library(randomForestSRC) # 2.9.3
 library(ranger) # 0.12.1
-library(grf) # 1.2.0.0
+library(grf) # 2.2.0
 
 # *** Estimators ***
 estimate_grf = function(data, data.test, honesty = TRUE, tune = FALSE) {

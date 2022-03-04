@@ -6,7 +6,7 @@ set.seed(42)
 library(survival)
 library(randomForestSRC) # 2.9.3
 library(ranger) # 0.12.1
-library(grf) # 1.2.0.0
+library(grf) # 2.2.0
 source('generate_survival_data.R')
 
 #' Compute E[T | X]
@@ -82,7 +82,6 @@ grid = expand.grid(
   n = c(2000),
   n.test = c(2000),
   dgp = c("ZK1", "ZK2", "ZK3", "ZK4"),
-  estimator = names(estimators),
   stringsAsFactors = FALSE
 )
 print(grid)
@@ -95,25 +94,25 @@ for (i in 1:nrow(grid)) {
   n = grid$n[i]
   n.test = grid$n.test[i]
   dgp = grid$dgp[i]
-  estimator = grid$estimator[i]
   data.test = generate_survival_data(n.test, dgp = dgp, n.mc = 1e5)
 
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
     data = generate_survival_data(n, dgp = dgp, n.mc = 1)
     data$Y = round(data$Y, 2)
-    est = estimators[[estimator]](data, data.test)
-
-    df = data.frame(mse = est$mse,
-                    err = est$err,
-                    elapsed.sec = as.numeric(est$elapsed.sec),
-                    n = n,
-                    n.test = n.test,
-                    dgp = dgp,
-                    estimator = estimator,
-                    sim = sim,
-                    stringsAsFactors = FALSE)
-    out = c(out, list(df))
+    for (estimator in names(estimators)) {
+      est = estimators[[estimator]](data, data.test)
+      df = data.frame(mse = est$mse,
+                      err = est$err,
+                      elapsed.sec = as.numeric(est$elapsed.sec),
+                      n = n,
+                      n.test = n.test,
+                      dgp = dgp,
+                      estimator = estimator,
+                      sim = sim,
+                      stringsAsFactors = FALSE)
+      out = c(out, list(df))
+    }
   }
 }
 print(Sys.time())
