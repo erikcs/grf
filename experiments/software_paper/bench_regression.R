@@ -51,8 +51,8 @@ estimators = list(grf = estimate_grf,
                   grf.adaptive = function (data, data.test) estimate_grf(data, data.test, honesty = FALSE),
                   grf.tuned = function (data, data.test) estimate_grf(data, data.test, tune = TRUE),
                   SRC = estimate_SRC,
-                  ranger = estimate_ranger
-                  )
+                  ranger = estimate_ranger)
+
 # *** bench ***
 grid = expand.grid(
   n = c(10000),
