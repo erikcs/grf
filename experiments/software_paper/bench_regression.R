@@ -58,7 +58,6 @@ grid = expand.grid(
   p = c(30),
   n.test = c(2000),
   dgp = c("kunzel", "ai1", "ai2"),
-  estimator = names(estimators),
   stringsAsFactors = FALSE
 )
 print(grid)
@@ -72,24 +71,24 @@ for (i in 1:nrow(grid)) {
   p = grid$p[i]
   n.test = grid$n.test[i]
   dgp = grid$dgp[i]
-  estimator = grid$estimator[i]
 
+  data.test = generate_causal_data(n.test, p, dgp = dgp)
   for (sim in 1:n.sim) {
     print(paste("sim", sim))
     data = generate_causal_data(n, p, dgp = dgp)
-    data.test = generate_causal_data(n.test, p, dgp = dgp)
-    est = estimators[[estimator]](data, data.test)
-
-    df = data.frame(mse = mean((est$y.hat - data.test$Y)^2),
-                    elapsed.sec = as.numeric(est$elapsed.sec),
-                    n = n,
-                    p = p,
-                    n.test = n.test,
-                    dgp = dgp,
-                    estimator = estimator,
-                    sim = sim,
-                    stringsAsFactors = FALSE)
-    out = c(out, list(df))
+    for (estimator in names(estimators)) {
+      est = estimators[[estimator]](data, data.test)
+      df = data.frame(mse = mean((est$y.hat - data.test$Y)^2),
+                      elapsed.sec = as.numeric(est$elapsed.sec),
+                      n = n,
+                      p = p,
+                      n.test = n.test,
+                      dgp = dgp,
+                      estimator = estimator,
+                      sim = sim,
+                      stringsAsFactors = FALSE)
+      out = c(out, list(df))
+    }
   }
 }
 print(Sys.time())
