@@ -2,6 +2,7 @@ rm(list = ls())
 library(xtable)
 
 df = read.csv("bench_regression.csv.gz")
+df$mse = df$mse * 100
 head(df)
 # Set order
 df$estimator = factor(df$estimator, levels = c("SRC", "ranger", "grf", "grf.adaptive", "grf.tuned"))
