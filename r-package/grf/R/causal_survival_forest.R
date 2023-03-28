@@ -263,39 +263,45 @@ causal_survival_forest <- function(X, Y, W, D,
   # using the identity
   # E[f(T) | X] = e(X) E[f(T) | X, W = 1] + (1 - e(X)) E[f(T) | X, W = 0]
   # (for this to work W has to be binary).
-  sf.survival <- do.call(survival_forest, c(list(X = cbind(X, W), Y = Y, D = D), args.nuisance))
+  sf.survival <- do.call(survival_forest, c(list(X = X, Y = Y, D = D), args.nuisance))
 
   # The survival function conditioning on being treated S(t, x, 1) estimated with an "S-learner".
   # Computing OOB estimates for modified training samples is not a workflow we have implemented,
   # so we do it with a manual workaround here (deleting/re-inserting precomputed predictions)
-  .predictions <- sf.survival[["predictions"]]
-  sf.survival[["predictions"]] <- NULL
-  sf.survival[["X.orig"]][, ncol(X) + 1] <- rep(1, nrow(X))
   S1.hat <- predict(sf.survival, num.threads = num.threads)$predictions
-  # The survival function conditioning on being a control unit S(t, x, 0) estimated with an "S-learner".
-  sf.survival[["X.orig"]][, ncol(X) + 1] <- rep(0, nrow(X))
-  S0.hat <- predict(sf.survival, num.threads = num.threads)$predictions
-  sf.survival[["X.orig"]][, ncol(X) + 1] <- W
-  sf.survival[["predictions"]] <- .predictions
-
   if (target == "RMST") {
-    Y.hat <- W.hat * expected_survival(S1.hat, sf.survival$failure.times) +
-      (1 - W.hat) * expected_survival(S0.hat, sf.survival$failure.times)
+    Y.hat <-  expected_survival(S1.hat, sf.survival$failure.times)
+
   } else {
     horizonS.index <- findInterval(horizon, sf.survival$failure.times)
     if (horizonS.index == 0) {
       Y.hat <- rep(1, nrow(X))
     } else {
-      Y.hat <- W.hat * S1.hat[, horizonS.index] + (1 - W.hat) * S0.hat[, horizonS.index]
+      Y.hat <-  S1.hat[, horizonS.index]
     }
   }
 
   # The conditional survival function S(t, x, w) used to construct Q(x).
-  S.hat <- predict(sf.survival, failure.times = Y.grid)$predictions
+  w1ix = which(W == 1)
+  w0ix = which(W == 0)
+  io = order(c(w1ix, w0ix))
+
+  sf.survival <- do.call(survival_forest, c(list(X = X[w1ix, ], Y = Y[w1ix], D = D[w1ix]), args.nuisance))
+  pp1 <- predict(sf.survival, failure.times = Y.grid)$predictions
+  sf.survival <- do.call(survival_forest, c(list(X = X[w0ix, ], Y = Y[w0ix], D = D[w0ix]), args.nuisance))
+  pp0 <- predict(sf.survival, failure.times = Y.grid)$predictions
+  S.hat = rbind(pp1, pp0)[io, ]
 
   # The conditional survival function for the censoring process S_C(t, x, w).
-  sf.censor <- do.call(survival_forest, c(list(X = cbind(X, W), Y = Y, D = 1 - D), args.nuisance))
-  C.hat <- predict(sf.censor, failure.times = Y.grid)$predictions
+  # sf.censor <- do.call(survival_forest, c(list(X = cbind(X, W), Y = Y, D = 1 - D), args.nuisance))
+  # C.hat <- predict(sf.censor, failure.times = Y.grid)$predictions
+  sf.censor <- do.call(survival_forest, c(list(X = X[w1ix, ], Y = Y[w1ix], D = 1 - D[w1ix]), args.nuisance))
+  pp1 <- predict(sf.censor, failure.times = Y.grid)$predictions
+  sf.censor <- do.call(survival_forest, c(list(X = X[w0ix, ], Y = Y[w0ix], D = 1 - D[w0ix]), args.nuisance))
+  pp0 <- predict(sf.censor, failure.times = Y.grid)$predictions
+  C.hat = rbind(pp1, pp0)[io, ]
+
+
   if (target == "survival.probability") {
     # Evaluate psi up to horizon
     D[Y > horizon] <- 1
