@@ -54,7 +54,7 @@ TEST_CASE("Kaplan-Meier survival estimates are correct", "[survival], [predictio
   data.set_outcome_index(outcome_index);
   data.set_censor_index(outcome_index + 1);
 
-  std::unordered_map<size_t, double> weights_by_sample;
+  phmap::flat_hash_map<size_t, double> weights_by_sample;
   for (size_t i = 0; i < num_rows; i++) {
     weights_by_sample[i] = 1.0;
   }
@@ -116,7 +116,7 @@ TEST_CASE("Kaplan-Meier estimates on duplicated data is the same as with sample 
   data_duplicated.set_outcome_index(outcome_index);
   data_duplicated.set_censor_index(outcome_index + 1);
 
-  std::unordered_map<size_t, double> weights_by_sample;
+  phmap::flat_hash_map<size_t, double> weights_by_sample;
   for (size_t i = 0; i < num_rows; i++) {
     weights_by_sample[i] = 1.0;
   }
@@ -163,7 +163,7 @@ TEST_CASE("Nelson-Aalen survival estimates are correct", "[survival], [predictio
   data.set_outcome_index(outcome_index);
   data.set_censor_index(outcome_index + 1);
 
-  std::unordered_map<size_t, double> weights_by_sample;
+  phmap::flat_hash_map<size_t, double> weights_by_sample;
   for (size_t i = 0; i < num_rows; i++) {
     weights_by_sample[i] = 1.0;
   }
@@ -225,7 +225,7 @@ TEST_CASE("Nelson-Aalen estimates on duplicated data is the same as with sample 
   data_duplicated.set_outcome_index(outcome_index);
   data_duplicated.set_censor_index(outcome_index + 1);
 
-  std::unordered_map<size_t, double> weights_by_sample;
+  phmap::flat_hash_map<size_t, double> weights_by_sample;
   for (size_t i = 0; i < num_rows; i++) {
     weights_by_sample[i] = 1.0;
   }

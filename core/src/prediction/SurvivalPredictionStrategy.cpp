@@ -39,7 +39,7 @@ size_t SurvivalPredictionStrategy::prediction_length() const {
 }
 
 std::vector<double> SurvivalPredictionStrategy::predict(size_t prediction_sample,
-    const std::unordered_map<size_t, double>& weights_by_sample,
+    const phmap::flat_hash_map<size_t, double>& weights_by_sample,
     const Data& train_data,
     const Data& data) const {
   // the event times will always range from 0, ..., num_failures
@@ -123,7 +123,7 @@ std::vector<double> SurvivalPredictionStrategy::predict_nelson_aalen(
 std::vector<double> SurvivalPredictionStrategy::compute_variance(
     size_t sample,
     const std::vector<std::vector<size_t>>& samples_by_tree,
-    const std::unordered_map<size_t, double>& weights_by_sampleID,
+    const phmap::flat_hash_map<size_t, double>& weights_by_sampleID,
     const Data& train_data,
     const Data& data,
     size_t ci_group_size) const {
