@@ -21,8 +21,8 @@
 #define GRF_SAMPLEWEIGHTCOMPUTER_H
 
 #include "forest/Forest.h"
+#include <parallel_hashmap/phmap.h>
 
-#include <unordered_map>
 #include <vector>
 
 namespace grf {

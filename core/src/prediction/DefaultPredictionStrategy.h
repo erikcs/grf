@@ -20,9 +20,9 @@
 #ifndef GRF_DEFAULTPREDICTIONSTRATEGY_H
 #define GRF_DEFAULTPREDICTIONSTRATEGY_H
 
-#include <unordered_map>
 #include <vector>
 
+#include <parallel_hashmap/phmap.h>
 #include "commons/globals.h"
 #include "commons/Data.h"
 #include "prediction/Prediction.h"
